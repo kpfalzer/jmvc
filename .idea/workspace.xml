@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b445aa27-5cd5-443f-8f7e-04b0e81547d3" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/src/jmvc/Exception.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/jmvc/model/Model.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/mariadb_java_client_2_5_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/jmvc/model/sql/SqlModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/jmvc/model/sql/SqlModelTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jmvc.iml" beforeDir="false" afterPath="$PROJECT_DIR$/jmvc.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/jmvc/model/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/jmvc/model/Model.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,8 +17,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Interface" />
+        <option value="Class" />
+        <option value="JUnit5 Test Class" />
       </list>
     </option>
   </component>
@@ -33,15 +36,47 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="Downloaded.Files.Path.Enabled" value="false" />
+    <property name="Repository.Attach.Annotations" value="false" />
+    <property name="Repository.Attach.JavaDocs" value="false" />
+    <property name="Repository.Attach.Sources" value="false" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary" value="JUnit5" />
+    <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5" value="" />
+    <property name="last_opened_file_path" value="/opt/javalibs/mariadb-java-client-2.5.4.jar!/" />
     <property name="project.structure.last.edited" value="Libraries" />
-    <property name="project.structure.proportion" value="0.0" />
-    <property name="project.structure.side.proportion" value="0.0" />
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Java" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CreateTestDialog.RecentsKey">
+      <recent name="jmvc.model.sql" />
+    </key>
+    <key name="CreateTestDialog.Recents.Supers">
+      <recent name="" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SqlModelTest.openDbase" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="jmvc" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="jmvc.model.sql.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="jmvc.model.sql" />
+      <option name="MAIN_CLASS_NAME" value="jmvc.model.sql.SqlModelTest" />
+      <option name="METHOD_NAME" value="openDbase" />
+      <option name="TEST_OBJECT" value="method" />
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -62,6 +97,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.SqlModelTest.openDbase" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -77,89 +117,89 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
+    <state x="257" y="84" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1586228524536">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state x="257" y="84" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1440.873@0.0.1440.873" timestamp="1586228524536" />
+    <state x="607" y="138" width="374" height="574" key="#com.intellij.ide.util.MemberChooser" timestamp="1586226653703">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state x="607" y="138" width="374" height="574" key="#com.intellij.ide.util.MemberChooser/0.0.1440.873@0.0.1440.873" timestamp="1586226653703" />
     <state x="564" y="328" width="301" height="213" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog" timestamp="1586016826188">
       <screen x="0" y="0" width="1440" height="873" />
     </state>
     <state x="564" y="328" width="301" height="213" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/0.0.1440.873@0.0.1440.873" timestamp="1586016826188" />
+    <state x="582" y="184" width="712" height="481" key="FileChooserDialogImpl" timestamp="1586225937987">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state x="582" y="184" width="712" height="481" key="FileChooserDialogImpl/0.0.1440.873@0.0.1440.873" timestamp="1586225937987" />
+    <state width="1200" height="239" key="GridCell.Tab.0.bottom" timestamp="1586228641425">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state width="1200" height="239" key="GridCell.Tab.0.bottom/0.0.1440.873@0.0.1440.873" timestamp="1586228641425" />
+    <state width="1200" height="239" key="GridCell.Tab.0.center" timestamp="1586228641423">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state width="1200" height="239" key="GridCell.Tab.0.center/0.0.1440.873@0.0.1440.873" timestamp="1586228641423" />
+    <state width="1200" height="239" key="GridCell.Tab.0.left" timestamp="1586228641422">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state width="1200" height="239" key="GridCell.Tab.0.left/0.0.1440.873@0.0.1440.873" timestamp="1586228641422" />
+    <state width="1200" height="239" key="GridCell.Tab.0.right" timestamp="1586228641424">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state width="1200" height="239" key="GridCell.Tab.0.right/0.0.1440.873@0.0.1440.873" timestamp="1586228641424" />
+    <state width="1200" height="239" key="GridCell.Tab.1.bottom" timestamp="1586228641430">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state width="1200" height="239" key="GridCell.Tab.1.bottom/0.0.1440.873@0.0.1440.873" timestamp="1586228641430" />
+    <state width="1200" height="239" key="GridCell.Tab.1.center" timestamp="1586228641428">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state width="1200" height="239" key="GridCell.Tab.1.center/0.0.1440.873@0.0.1440.873" timestamp="1586228641428" />
+    <state width="1200" height="239" key="GridCell.Tab.1.left" timestamp="1586228641427">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state width="1200" height="239" key="GridCell.Tab.1.left/0.0.1440.873@0.0.1440.873" timestamp="1586228641427" />
+    <state width="1200" height="239" key="GridCell.Tab.1.right" timestamp="1586228641429">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state width="1200" height="239" key="GridCell.Tab.1.right/0.0.1440.873@0.0.1440.873" timestamp="1586228641429" />
+    <state x="288" y="28" width="1024" height="842" key="SettingsEditor" timestamp="1586226906168">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state x="288" y="28" width="1024" height="842" key="SettingsEditor/0.0.1440.873@0.0.1440.873" timestamp="1586226906168" />
     <state x="386" y="264" key="com.intellij.ide.util.TipDialog" timestamp="1586138550273">
       <screen x="0" y="0" width="1440" height="873" />
     </state>
     <state x="386" y="264" key="com.intellij.ide.util.TipDialog/0.0.1440.873@0.0.1440.873" timestamp="1586138550273" />
+    <state x="472" y="323" width="644" height="204" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD" timestamp="1586226969505">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state x="472" y="323" width="644" height="204" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD/0.0.1440.873@0.0.1440.873" timestamp="1586226969505" />
+    <state x="463" y="109" width="662" height="632" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1586226741904">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state x="463" y="109" width="662" height="632" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1440.873@0.0.1440.873" timestamp="1586226741904" />
+    <state x="573" y="147" width="442" height="556" key="com.intellij.testIntegration.createTest.CreateTestDialog" timestamp="1586226954714">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state x="573" y="147" width="442" height="556" key="com.intellij.testIntegration.createTest.CreateTestDialog/0.0.1440.873@0.0.1440.873" timestamp="1586226954714" />
   </component>
-  <component name="masterDetails">
-    <states>
-      <state key="ArtifactsStructureConfigurable.UI">
-        <settings>
-          <artifact-editor />
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="FacetStructureConfigurable.UI">
-        <settings>
-          <last-edited>No facets are configured</last-edited>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="GlobalLibrariesConfigurable.UI">
-        <settings>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="JdkListConfigurable.UI">
-        <settings>
-          <last-edited>1.8</last-edited>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="ModuleStructureConfigurable.UI">
-        <settings>
-          <last-edited>jmvc</last-edited>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-                <option value="0.6" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="ProjectLibrariesConfigurable.UI">
-        <settings>
-          <last-edited>gblibx</last-edited>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-    </states>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/test/jmvc/model/sql/SqlModelTest.java</url>
+          <line>9</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/jmvc/model/sql/SqlModel.java</url>
+          <line>17</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

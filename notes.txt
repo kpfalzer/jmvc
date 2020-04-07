@@ -1,0 +1,10 @@
+created test dbase:
+//https://docs.bitnami.com/aws/infrastructure/mariadb/configuration/create-database/
+MariaDB [(none)]> grant all privileges on foobar.* TO 'foobaruser'@'localhost' identified by 'foobarpasswd';
+Query OK, 0 rows affected (0.01 sec)
+
+MariaDB [(none)]> grant all privileges on foobar.* TO 'foobaruser'@'%' identified by 'foobarpasswd';Query OK, 0 rows affected (0.00 sec)
+
+MariaDB [(none)]> flush privileges;
+Query OK, 0 rows affected (0.00 sec)
+
