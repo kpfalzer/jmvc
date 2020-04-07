@@ -8,3 +8,39 @@ MariaDB [(none)]> grant all privileges on foobar.* TO 'foobaruser'@'%' identifie
 MariaDB [(none)]> flush privileges;
 Query OK, 0 rows affected (0.00 sec)
 
+=====================================================================================================
+Derby: http://db.apache.org/derby/papers/DerbyTut/ns_intro.html
+In case if only a database name is given in the connection string (without the full path), Derby searches the database in the "system directory".
+The system directory could be declared using derby.system.home property.
+
+kpfalzer@karlp-mba tmp]$ java -Dderby.system.home=$PWD/dbase -jar lib/derbyrun.jar server start
+Tue Apr 07 11:30:57 PDT 2020 : Security manager installed using the Basic server security policy.
+Tue Apr 07 11:30:58 PDT 2020 : Apache Derby Network Server - 10.14.2.0 - (1828579) started and ready to accept connections on port 1527
+
+java -jar tmp/lib/derbyrun.jar ij
+ij> connect 'jdbc:derby://localhost:1527/MyDbTest;create=true';
+
+Privileges: https://db.apache.org/derby/docs/10.5/devguide/cdevcsecure36595.html
+
+ij> connect 'jdbc:derby://localhost:1527/MyDbTest;create=true';
+ij> grant all privileges on MyDbTest.* TO 'mydbtestuser'@'%' identified by 'mydbtestpasswd';
+ERROR 42Z60: GRANT not allowed unless database property derby.database.sqlAuthorization has value 'TRUE'.
+
+So rm -rf the physical dbase dir and then:
+java -Dderby.system.home=$PWD/dbase -Dderby.database.sqlAuthorization=true -jar lib/derbyrun.jar server start
+
+ij> CREATE TABLE Student (
+   Id INT NOT NULL GENERATED ALWAYS AS IDENTITY,
+   Age INT NOT NULL,
+   First_Name VARCHAR(255),
+   last_name VARCHAR(255),
+   PRIMARY KEY (Id)
+);
+0 rows inserted/updated/deleted
+ij> show tables;
+TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
+------------------------------------------------------------------------
+...
+APP                 |STUDENT                       |                    
+ij> grant all privileges on APP.STUDENT  TO mydbtestuser ;
+0 rows inserted/updated/deleted

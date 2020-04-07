@@ -2,12 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b445aa27-5cd5-443f-8f7e-04b0e81547d3" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/mariadb_java_client_2_5_4.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/jmvc/model/sql/SqlModel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/jmvc/model/sql/SqlModelTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jmvc.iml" beforeDir="false" afterPath="$PROJECT_DIR$/jmvc.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/jmvc/model/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/jmvc/model/Model.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/notes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/jmvc/model/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/jmvc/model/Database.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/jmvc/model/sql/SqlModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/jmvc/model/sql/SqlDatabase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/jmvc/model/sql/SqlModelTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/test/jmvc/model/sql/SqlDatabaseTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +63,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SqlModelTest.openDbase" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="SqlDatabaseTest.openDbase" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="jmvc" />
       <extension name="coverage">
         <pattern>
@@ -73,7 +72,7 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="jmvc.model.sql" />
-      <option name="MAIN_CLASS_NAME" value="jmvc.model.sql.SqlModelTest" />
+      <option name="MAIN_CLASS_NAME" value="jmvc.model.sql.SqlDatabaseTest" />
       <option name="METHOD_NAME" value="openDbase" />
       <option name="TEST_OBJECT" value="method" />
       <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
@@ -99,7 +98,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.SqlModelTest.openDbase" />
+        <item itemvalue="JUnit.SqlDatabaseTest.openDbase" />
       </list>
     </recent_temporary>
   </component>
@@ -129,6 +128,10 @@
       <screen x="0" y="0" width="1440" height="873" />
     </state>
     <state x="564" y="328" width="301" height="213" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/0.0.1440.873@0.0.1440.873" timestamp="1586016826188" />
+    <state x="516" y="0" width="556" height="869" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1586283033559">
+      <screen x="0" y="0" width="1440" height="873" />
+    </state>
+    <state x="516" y="0" width="556" height="869" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1440.873@0.0.1440.873" timestamp="1586283033559" />
     <state x="582" y="184" width="712" height="481" key="FileChooserDialogImpl" timestamp="1586225937987">
       <screen x="0" y="0" width="1440" height="873" />
     </state>
@@ -190,12 +193,12 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/test/jmvc/model/sql/SqlModelTest.java</url>
+          <url>file://$PROJECT_DIR$/test/jmvc/model/sql/SqlDatabaseTest.java</url>
           <line>9</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/jmvc/model/sql/SqlModel.java</url>
+          <url>file://$PROJECT_DIR$/src/jmvc/model/sql/SqlDatabase.java</url>
           <line>17</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>

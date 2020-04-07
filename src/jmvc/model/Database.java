@@ -6,8 +6,8 @@ import java.util.Properties;
  * Model base class.
  * Implementations extend, as in Sql.
  */
-public abstract class Model {
-    protected Model(Properties props) {
+public abstract class Database {
+    protected Database(Properties props) {
         __properties = props;
     }
 
@@ -15,7 +15,7 @@ public abstract class Model {
         return __properties.getProperty(DB_NAME);
     }
 
-    public abstract void openDbase();
+    public abstract void open();
 
     public static final String DB_NAME = "db.name";
     public static final String DB_USER = "db.user";
