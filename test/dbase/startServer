@@ -1,0 +1,4 @@
+#!/bin/csh -f
+
+source ./common.csh
+exec java -Dderby.system.home=$PWD -Dderby.database.sqlAuthorization=true -jar ./derbyrun.jar server start -h $host -p $port
