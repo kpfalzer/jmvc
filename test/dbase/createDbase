@@ -17,5 +17,6 @@ create table MyDbTest.Student (
    last_name VARCHAR(255),
    PRIMARY KEY (Id)
 );
+grant ALL PRIVILEGES ON MyDbTest.Student TO MyDbTestUser ;
 exit;
 EOF
