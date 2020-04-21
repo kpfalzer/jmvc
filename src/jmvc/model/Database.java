@@ -5,9 +5,7 @@ import jmvc.Exception;
 import jmvc.model.derby.DerbyDatabase;
 import jmvc.model.sql.SqlDatabase;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +48,17 @@ public abstract class Database {
 
     public String name() {
         return _config.requireProperty(NAME);
+    }
+
+    public String getFullTableName(String tblName) {
+        return (0 < tblName.indexOf('.')) ? tblName : String.format("%s.%s", name(), tblName);
+    }
+
+    public boolean hasTable(String shortTblName) throws SQLException {
+        ResultSet rs = getConnection()
+                .getMetaData()
+                .getTables(null, null, upcase(shortTblName), null);
+        return rs.next();
     }
 
     public static final String URL = "url";

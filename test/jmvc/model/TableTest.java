@@ -1,18 +1,23 @@
 package jmvc.model;
 
+import jmvc.Config;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Types;
+import java.sql.SQLException;
 
 class TableTest {
 
     @Test
-    void getConfig() {
-        final Table.Config config = Table.getConfig(
-                "col1", Types.BIGINT, null,
-                "id", Table.PRIMARY_KEY, null,
-                "dt", Types.TIMESTAMP_WITH_TIMEZONE, "some constraint here"
+    void getConfig() throws SQLException {
+        final Config config = Database.getConfig(
+                "jdbc:derby://localhost:3308/MyDbTest",
+                "MyDbTest",
+                "MyDbTestUser",
+                "MyDbTestPasswd"
         );
+        final Database dbase = Database.connect(config);
+        final Table table = Table.create("student");
+        final boolean hasTbl = dbase.hasTable("student");
         boolean stop = true;
     }
 }
