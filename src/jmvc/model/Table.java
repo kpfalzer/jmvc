@@ -1,10 +1,5 @@
 package jmvc.model;
 
-import gblibx.Util;
-import jmvc.Exception;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
@@ -50,26 +45,18 @@ public abstract class Table {
     protected LinkedHashMap<String, ColInfo> _colInfoByColName = new LinkedHashMap<>();
 
     public static class ColInfo {
-        public static Util.Pair<String, ColInfo> create(ResultSet rs) {
-            try {
-                final String name = rs.getString("COLUMN_NAME");
-                final ColInfo info = new ColInfo(rs);
-                return new Util.Pair<>(name, info);
-            } catch (SQLException e) {
-                throw new Exception(e);
-            }
+        public ColInfo(int type, int size, int position, String defaultVal, boolean isPrimaryKey) {
+            this.type = type;
+            this.size = size;
+            this.position = position;
+            this.defaultVal = defaultVal;
+            this.isPrimaryKey = isPrimaryKey;
         }
-        public ColInfo(ResultSet rs) {
-            try {
-                type = rs.getInt("DATA_TYPE");
-                size = rs.getInt("COLUMN_SIZE");
-                position = rs.getInt("ORDINAL_POSITION");
-            } catch (SQLException e) {
-                throw new Exception(e);
-            }
-        }
+
         public final int type;
         public final int size;
         public final int position;
+        public final String defaultVal;
+        public final boolean isPrimaryKey;
     }
 }

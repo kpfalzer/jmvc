@@ -1,17 +1,14 @@
 package jmvc.model;
 
 import jmvc.Config;
-import jmvc.Exception;
 import jmvc.model.sql.SqlDatabase;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static gblibx.Util.*;
+import static gblibx.Util.expectNever;
+import static gblibx.Util.expectNonNull;
+import static gblibx.Util.invariant;
 
 /**
  * Model base class.
@@ -38,23 +35,12 @@ public abstract class Database {
         return _connection;
     }
 
-    protected Database(Config config) {
+    protected Database(Config config, Connection conn) {
         _config = config;
-        try {
-            _connection = DriverManager.getConnection(_config.requireProperty(URL), _config);
-            _connection.setSchema(SCHEMA);
-        } catch (SQLException ex) {
-            throw new Exception(ex);
-        }
+        _connection = conn;
     }
 
-    public String getSchema() {
-        try {
-            return _connection.getSchema();
-        } catch (SQLException e) {
-            throw new Exception(e);
-        }
-    }
+    public abstract String getSchema();
 
     public String name() {
         return _config.requireProperty(NAME);
@@ -66,17 +52,7 @@ public abstract class Database {
                 : String.format("%s.%s", name(), tblName);
     }
 
-    public boolean hasTable(String shortTblName) {
-        ResultSet rs = null;
-        try {
-            rs = getConnection()
-                    .getMetaData()
-                    .getTables(null, null, upcase(shortTblName), null);
-            return rs.next();
-        } catch (SQLException e) {
-            throw new Exception(e);
-        }
-    }
+    public abstract boolean hasTable(String shortTblName);
 
     public abstract Object executeStatement(String statement);
 

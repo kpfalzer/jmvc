@@ -1,13 +1,12 @@
 package jmvc.model;
 
 import jmvc.Config;
+import jmvc.model.sql.SqlDatabase;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -24,18 +23,13 @@ class DatabaseTest {
                     "MyDbTestPasswd"
             );
             final Database dbase = Database.connect(config);
-            final Connection conn = dbase.getConnection();
+            final Connection conn = SqlDatabase.myDbase(dbase).getMyConnection();
             assertTrue(conn.isValid(0));
             {
-                final String table = "MyDbTest.student";
-                final String query = "select * from " + table;
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(query);
-                ResultSetMetaData rsmd = rs.getMetaData();
                 //todo: rsmd get info about cols.
                 //BUT: we need something fancier for primary keys
                 //NOTE: uppercase table name!
-                rs = conn.getMetaData().getPrimaryKeys(null, null, "STUDENT");
+                ResultSet rs = conn.getMetaData().getPrimaryKeys(null, null, "TEACHER");
                 while (rs.next()) {
                     System.out.println(rs.getString("COLUMN_NAME") + ":" + rs.getString("KEY_SEQ"));
                 }
