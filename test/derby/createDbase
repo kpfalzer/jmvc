@@ -10,13 +10,14 @@ CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(
     'derby.user.MyDbTestUser', 'MyDbTestPasswd');
 CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(
     'derby.database.fullAccessUsers', 'MyDbTestUser');
-create table MyDbTest.Student (
-   Id INT NOT NULL GENERATED ALWAYS AS IDENTITY,
-   Age INT NOT NULL,
-   First_Name VARCHAR(255),
-   last_name VARCHAR(255),
-   PRIMARY KEY (Id)
-);
-grant ALL PRIVILEGES ON MyDbTest.Student TO MyDbTestUser ;
+create schema DEVELOPMENT AUTHORIZATION MYDBTESTUSER;
+--create table MyDbTest.Student (
+--   Id INT NOT NULL GENERATED ALWAYS AS IDENTITY,
+--   Age INT NOT NULL,
+--   First_Name VARCHAR(255),
+--   last_name VARCHAR(255),
+--   PRIMARY KEY (Id)
+--);
+--grant ALL PRIVILEGES ON MyDbTest.Student TO MyDbTestUser ;
 exit;
 EOF

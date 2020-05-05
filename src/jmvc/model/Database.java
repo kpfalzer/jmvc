@@ -2,10 +2,12 @@ package jmvc.model;
 
 import jmvc.Config;
 import jmvc.Exception;
-import jmvc.model.derby.DerbyDatabase;
 import jmvc.model.sql.SqlDatabase;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,11 +23,10 @@ public abstract class Database {
         final String type = __getDbaseType(url);
         Database dbase = null;
         switch (type) {
-            case "derby":
-                dbase = new DerbyDatabase(config);
-                break;
+            case "derby":   //fall through
             case "mariadb":
                 dbase = new SqlDatabase(config);
+                break;
             default:
                 expectNever("Invalid dbase type: " + type);
         }
@@ -41,8 +42,17 @@ public abstract class Database {
         _config = config;
         try {
             _connection = DriverManager.getConnection(_config.requireProperty(URL), _config);
+            _connection.setSchema(SCHEMA);
         } catch (SQLException ex) {
             throw new Exception(ex);
+        }
+    }
+
+    public String getSchema() {
+        try {
+            return _connection.getSchema();
+        } catch (SQLException e) {
+            throw new Exception(e);
         }
     }
 
@@ -51,15 +61,24 @@ public abstract class Database {
     }
 
     public String getFullTableName(String tblName) {
-        return (0 < tblName.indexOf('.')) ? tblName : String.format("%s.%s", name(), tblName);
+        return (0 < tblName.indexOf('.'))
+                ? tblName
+                : String.format("%s.%s", name(), tblName);
     }
 
-    public boolean hasTable(String shortTblName) throws SQLException {
-        ResultSet rs = getConnection()
-                .getMetaData()
-                .getTables(null, null, upcase(shortTblName), null);
-        return rs.next();
+    public boolean hasTable(String shortTblName) {
+        ResultSet rs = null;
+        try {
+            rs = getConnection()
+                    .getMetaData()
+                    .getTables(null, null, upcase(shortTblName), null);
+            return rs.next();
+        } catch (SQLException e) {
+            throw new Exception(e);
+        }
     }
+
+    public abstract Object executeStatement(String statement);
 
     public static final String URL = "url";
     public static final String NAME = "name";
@@ -81,4 +100,6 @@ public abstract class Database {
 
     protected final Config _config;
     protected final Connection _connection;
+
+    public static final String SCHEMA = System.getProperty("db.schema", "DEVELOPMENT");
 }

@@ -1,25 +1,28 @@
 package jmvc.model;
 
+import gblibx.Util;
+import jmvc.Exception;
+
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
-public class Table {
-    public static Table create(String name, String... eles) {
-        return new Table(name, getConfig(eles));
-    }
+public abstract class Table {
 
-    private Table(String name, Config config) {
+    protected Table(String name, Config config, Database dbase) {
         this.name = name;
-        this.config = config;
+        this._config = config;
+        this._dbase = dbase;
     }
 
     /**
      * Create configuration.
      *
      * @param eles series of clauses to CREATE TABLE
-     * @return type... by name configuration
+     * @return list of clauses.
      */
-    public static Config getConfig(String... eles) {
+    protected static Config _getConfig(String... eles) {
         return new Config(eles);
     }
 
@@ -29,10 +32,44 @@ public class Table {
         }
     }
 
-    /*package*/ void initialize(Database dbase) throws SQLException {
-        boolean hasTable = dbase.hasTable(name);
+    public void initialize() {
+        boolean hasTable = _dbase.hasTable(name);
+        if (!hasTable) {
+            _createTable();
+        }
+        _getColumnInfo();
     }
 
-    private final String name;
-    private final Config config;
+    protected abstract void _getColumnInfo();
+
+    protected abstract void _createTable();
+
+    public final String name;
+    protected final Config _config;
+    protected final Database _dbase;
+    protected LinkedHashMap<String, ColInfo> _colInfoByColName = new LinkedHashMap<>();
+
+    public static class ColInfo {
+        public static Util.Pair<String, ColInfo> create(ResultSet rs) {
+            try {
+                final String name = rs.getString("COLUMN_NAME");
+                final ColInfo info = new ColInfo(rs);
+                return new Util.Pair<>(name, info);
+            } catch (SQLException e) {
+                throw new Exception(e);
+            }
+        }
+        public ColInfo(ResultSet rs) {
+            try {
+                type = rs.getInt("DATA_TYPE");
+                size = rs.getInt("COLUMN_SIZE");
+                position = rs.getInt("ORDINAL_POSITION");
+            } catch (SQLException e) {
+                throw new Exception(e);
+            }
+        }
+        public final int type;
+        public final int size;
+        public final int position;
+    }
 }

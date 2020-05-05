@@ -1,0 +1,14 @@
+Mon May 04 17:26:02 PDT 2020 : Apache Derby Network Server - 10.14.2.0 - (1828579) started and ready to accept connections on port 3308
+----------------------------------------------------------------
+Mon May 04 17:26:06 PDT 2020:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0171-e239-5aaa-ffffa4c603b9 
+on database directory /Users/kpfalzer/projects/jmvc/test/derby/dbase/MyDbTest with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@799f7e29 
+Loaded from file:/opt/javalibs/db-derby-10.14.2.0-lib/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=11.0.3+12-LTS
+user.dir=/Users/kpfalzer/projects/jmvc/test/derby
+os.name=Mac OS X
+os.arch=x86_64
+os.version=10.14.6
+derby.system.home=/Users/kpfalzer/projects/jmvc/test/derby/dbase
+Database Class Loader started - derby.database.classpath=''
