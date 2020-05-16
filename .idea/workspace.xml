@@ -2,14 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b445aa27-5cd5-443f-8f7e-04b0e81547d3" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/src/jmvc/model/Connection.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/jmvc/server/HttpServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/jmvc/server/RequestHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/jmvc/model/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/jmvc/model/Database.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/jmvc/model/Table.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/jmvc/model/Table.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/jmvc/model/sql/SqlDatabase.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/jmvc/model/sql/SqlDatabase.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/jmvc/model/sql/SqlTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/jmvc/model/sql/SqlTable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/derby/derby.log" beforeDir="false" afterPath="$PROJECT_DIR$/test/derby/derby.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/jmvc/model/DatabaseTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/test/jmvc/model/DatabaseTest.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -25,8 +20,8 @@
       <list>
         <option value="FxmlFile" />
         <option value="JUnit5 Test Class" />
-        <option value="Class" />
         <option value="Interface" />
+        <option value="Class" />
       </list>
     </option>
   </component>
