@@ -1,20 +1,24 @@
 package jmvc.server;
 
+import com.sun.net.httpserver.HttpExchange;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * Test POST request:
- * curl --header "Content-Type: application/json" --request POST --data '{"username":"xyz","password":"xyz"}' http://localhost:3005/abc
+ * curl --header "Content-Type: application/json" --request POST --data '{"username":"xyz","password":"xyz","ar1":[1,2,3]}' http://localhost:3005/abc
  */
 class RequestHandlerTest {
 
     static MtHttpServer server;
 
     static class Handler extends RequestHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            _initialize(exchange);
+            boolean debug = true;
+        }
     }
 
     static void initialize() throws IOException {
