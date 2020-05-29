@@ -11,6 +11,23 @@ import static gblibx.Util.castobj;
 
 class TableTest {
 
+    static enum ETeacher implements Table.ColSpec {
+        ID("? INT NOT NULL GENERATED ALWAYS AS IDENTITY; PRIMARY KEY (?)"),
+        LOCATION("? VARCHAR(255)"),
+        CREATED_AT("? timestamp default current_timestamp");
+
+        ETeacher(String spec) {
+          __spec = spec;
+        }
+
+        final String __spec;
+
+        @Override
+        public String getSpec() {
+            return __spec;
+        }
+    }
+
     @Test
     void getConfig() throws SQLException {
         final Config config = Database.getConfig(
@@ -23,10 +40,7 @@ class TableTest {
         final Table table = SqlTable.create(
                 dbase,
                 "teacher",
-                "Id INT NOT NULL GENERATED ALWAYS AS IDENTITY",
-                "Location VARCHAR(255)",
-                "CREATED_AT timestamp default current_timestamp",
-                "PRIMARY KEY (Id)"
+                ETeacher.values()
         );
         table.initialize();
         {

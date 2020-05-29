@@ -1,6 +1,6 @@
 #!/bin/csh -f
 
-rm -rf MyDbTest
+rm -rf dbase/MyDbTest
 exec java -jar ./derbyrun.jar ij <<EOF
 connect 'jdbc:derby://localhost:3308/MyDbTest;create=true';
 CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(

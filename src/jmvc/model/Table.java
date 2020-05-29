@@ -1,30 +1,27 @@
 package jmvc.model;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import jmvc.Exception;
+
+import static gblibx.Util.castobj;
 
 public abstract class Table {
 
-    protected Table(String name, Config config, Database dbase) {
+    protected Table(String name, Enum[] config, Database dbase) {
         this.name = name;
         this._config = config;
         this._dbase = dbase;
     }
 
     /**
-     * Create configuration.
-     *
-     * @param eles series of clauses to CREATE TABLE
-     * @return list of clauses.
+     * Column config (enum) must implement.
      */
-    protected static Config _getConfig(String... eles) {
-        return new Config(eles);
+    public interface ColSpec {
+        public String getSpec();
     }
 
-    public static class Config extends LinkedList<String> {
-        private Config(String[] eles) {
-            for (String s : eles) super.add(s);
-        }
+    protected String[] _getColumnSpec(Enum e) {
+        final ColSpec specObj = castobj(e);
+        return specObj.getSpec().replace("?", e.name()).split("\\s*;\\s*");
     }
 
     public void initialize() {
@@ -32,17 +29,33 @@ public abstract class Table {
         if (!hasTable) {
             _createTable();
         }
-        _getColumnInfo();
+        _setColumnInfo();
     }
 
-    protected abstract void _getColumnInfo();
+    /**
+     * Return ordinal of colName.
+     * @param colName column name.
+     * @return ordinal value.
+     */
+    protected int _getColInfoIx(String colName) {
+        for (Enum e : _config) {
+            if (e.name().equalsIgnoreCase(colName))
+                return e.ordinal();
+        }
+        throw new Exception.TODO("invalid column: "+colName);
+    }
+
+    protected abstract void _setColumnInfo();
 
     protected abstract void _createTable();
 
     public final String name;
-    protected final Config _config;
+    protected final Enum[] _config;
     protected final Database _dbase;
-    protected LinkedHashMap<String, ColInfo> _colInfoByColName = new LinkedHashMap<>();
+    /**
+     * ColInfo by _config ordinal.
+     */
+    protected ColInfo[] _colInfo;
 
     public static class ColInfo {
         public ColInfo(int type, int size, int position, String defaultVal, boolean isPrimaryKey) {

@@ -14,12 +14,12 @@ import java.util.Set;
 import static gblibx.Util.upcase;
 
 public class SqlTable extends Table {
-    public static SqlTable create(Database dbase, String name, String... eles) {
-        return new SqlTable(name, _getConfig(eles), dbase);
+    public static SqlTable create(Database dbase, String name, Enum[] cols) {
+        return new SqlTable(name, cols, dbase);
     }
 
-    private SqlTable(String name, Config config, Database dbase) {
-        super(name, config, dbase);
+    private SqlTable(String name, Enum[] cols, Database dbase) {
+        super(name, cols, dbase);
     }
 
     private SqlDatabase __dbase() {
@@ -32,12 +32,13 @@ public class SqlTable extends Table {
                     .getMyConnection()
                     .getMetaData();
         } catch (SQLException e) {
-            throw new Exception(e);
+            throw new Exception.TODO(e);
         }
     }
 
     @Override
-    protected void _getColumnInfo() {
+    protected void _setColumnInfo() {
+        _colInfo = new ColInfo[_config.length];
         final String tblName = upcase(name);
         Set<String> primaryKeys = new HashSet<>();
         try {
@@ -50,10 +51,10 @@ public class SqlTable extends Table {
                     .getColumns(null, null, tblName, null);
             while (rs.next()) {
                 Util.Pair<String, ColInfo> info = __create(rs, primaryKeys);
-                _colInfoByColName.put(info.v1, info.v2);
+                _colInfo[_getColInfoIx(info.v1)] = info.v2;
             }
         } catch (SQLException e) {
-            throw new Exception(e);
+            throw new Exception.TODO(e);
         }
     }
 
@@ -69,7 +70,7 @@ public class SqlTable extends Table {
             );
             return new Util.Pair<>(name, info);
         } catch (SQLException e) {
-            throw new Exception(e);
+            throw new Exception.TODO(e);
         }
     }
 
@@ -78,17 +79,18 @@ public class SqlTable extends Table {
         StringBuilder xstmt = new StringBuilder(
                 String.format("CREATE TABLE %s (", name));
         int i = 0;
-        for (String col : super._config) {
-            xstmt
-                    .append((0 < i++) ? "," : "")
-                    .append("\n")
-                    .append(col);
+        for (Enum colSpec : super._config) {
+            for (String c : _getColumnSpec(colSpec))
+                xstmt
+                        .append((0 < i++) ? "," : "")
+                        .append("\n")
+                        .append(c);
         }
         xstmt.append(")");
         try {
             _dbase.executeStatement(xstmt.toString());
         } catch (Exception ex) {
-            boolean debug = true;
+            throw new Exception.TODO(ex);
         }
     }
 }
