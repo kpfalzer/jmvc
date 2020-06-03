@@ -57,7 +57,7 @@ class TableTest {
             int id = table.insertRow(ETeacher.LOCATION, "new location");
             id += 0;
         }
-        {
+        if (false){
             int id = table.insertRow(EBad.eFoo, "bad value");
             id += 0;
         }
