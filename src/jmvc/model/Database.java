@@ -31,13 +31,13 @@ public abstract class Database {
         return dbase;
     }
 
-    public Connection getConnection() {
-        return _connection;
+    protected Connection _getConnection() {
+        return __connection;
     }
 
     protected Database(Config config, Connection conn) {
         _config = config;
-        _connection = conn;
+        __connection = conn;
     }
 
     public abstract String getSchema();
@@ -75,7 +75,7 @@ public abstract class Database {
     }
 
     protected final Config _config;
-    protected final Connection _connection;
+    private final Connection __connection;
 
     public static final String SCHEMA = System.getProperty("db.schema", "DEVELOPMENT");
 }

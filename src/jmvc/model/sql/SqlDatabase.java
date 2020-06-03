@@ -48,7 +48,7 @@ public class SqlDatabase extends Database {
     }
 
     public java.sql.Connection getMyConnection() {
-        return castobj(_connection.connection);
+        return castobj(super._getConnection().connection);
     }
 
     public static SqlDatabase myDbase(Database dbase) {

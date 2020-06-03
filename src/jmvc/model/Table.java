@@ -3,9 +3,11 @@ package jmvc.model;
 import jmvc.Exception;
 
 import static gblibx.Util.castobj;
+import static gblibx.Util.isNonNull;
 
 public abstract class Table {
 
+    //TODO: use EnumSet to constrain to specific Enum
     protected Table(String name, Enum[] config, Database dbase) {
         this.name = name;
         this._config = config;
@@ -34,6 +36,7 @@ public abstract class Table {
 
     /**
      * Return ordinal of colName.
+     *
      * @param colName column name.
      * @return ordinal value.
      */
@@ -42,12 +45,20 @@ public abstract class Table {
             if (e.name().equalsIgnoreCase(colName))
                 return e.ordinal();
         }
-        throw new Exception.TODO("invalid column: "+colName);
+        throw new Exception.TODO("invalid column: " + colName);
     }
 
     protected abstract void _setColumnInfo();
 
     protected abstract void _createTable();
+
+    /**
+     * Insert a new row into table.
+     *
+     * @param colVals pairs of Enum/col, value
+     * @return generated ID or -1 if no ID.
+     */
+    public abstract int insertRow(Object... colVals);
 
     public final String name;
     protected final Enum[] _config;
@@ -64,6 +75,10 @@ public abstract class Table {
             this.position = position;
             this.defaultVal = defaultVal;
             this.isPrimaryKey = isPrimaryKey;
+        }
+
+        public boolean hasDefaultVal() {
+            return isNonNull(defaultVal);
         }
 
         public final int type;

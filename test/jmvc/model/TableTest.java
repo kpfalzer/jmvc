@@ -51,6 +51,10 @@ class TableTest {
             ResultSet rs = castobj(r);
             boolean stop = true;
         }
+        {
+            int id = table.insertRow(ETeacher.LOCATION, "new location");
+            id += 0;
+        }
         boolean stop = true;
     }
 }
