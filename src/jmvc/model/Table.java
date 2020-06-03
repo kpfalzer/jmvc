@@ -2,16 +2,26 @@ package jmvc.model;
 
 import jmvc.Exception;
 
+import java.util.EnumSet;
+
 import static gblibx.Util.castobj;
 import static gblibx.Util.isNonNull;
 
-public abstract class Table {
+public abstract class Table <E extends Enum<E>> {
 
-    //TODO: use EnumSet to constrain to specific Enum
-    protected Table(String name, Enum[] config, Database dbase) {
+    protected Table(String name, Class<E> config, Database dbase) {
         this.name = name;
-        this._config = config;
+        this._configSet = EnumSet.allOf(config);
+        this._config = __universe();
         this._dbase = dbase;
+    }
+
+    private Enum<E>[] __universe() {
+        Enum<E> u[] = new Enum[_configSet.size()];
+        for (Enum<E> e : _configSet) {
+            u[e.ordinal()] = e;
+        }
+        return u;
     }
 
     /**
@@ -21,7 +31,7 @@ public abstract class Table {
         public String getSpec();
     }
 
-    protected String[] _getColumnSpec(Enum e) {
+    protected String[] _getColumnSpec(Enum<E> e) {
         final ColSpec specObj = castobj(e);
         return specObj.getSpec().replace("?", e.name()).split("\\s*;\\s*");
     }
@@ -41,7 +51,7 @@ public abstract class Table {
      * @return ordinal value.
      */
     protected int _getColInfoIx(String colName) {
-        for (Enum e : _config) {
+        for (Enum<E> e : _config) {
             if (e.name().equalsIgnoreCase(colName))
                 return e.ordinal();
         }
@@ -52,6 +62,10 @@ public abstract class Table {
 
     protected abstract void _createTable();
 
+    protected boolean _isValidColumn(Enum<E> col) {
+        return _configSet.contains(col);
+    }
+
     /**
      * Insert a new row into table.
      *
@@ -61,7 +75,8 @@ public abstract class Table {
     public abstract int insertRow(Object... colVals);
 
     public final String name;
-    protected final Enum[] _config;
+    protected final Enum<E>[] _config;
+    protected final EnumSet<E> _configSet;
     protected final Database _dbase;
     /**
      * ColInfo by _config ordinal.

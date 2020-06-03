@@ -17,7 +17,7 @@ class TableTest {
         CREATED_AT("? timestamp default current_timestamp");
 
         ETeacher(String spec) {
-          __spec = spec;
+            __spec = spec;
         }
 
         final String __spec;
@@ -28,6 +28,8 @@ class TableTest {
         }
     }
 
+    static enum EBad {eFoo};
+
     @Test
     void getConfig() throws SQLException {
         final Config config = Database.getConfig(
@@ -37,10 +39,10 @@ class TableTest {
                 "MyDbTestPasswd"
         );
         final Database dbase = Database.connect(config);
-        final Table table = SqlTable.create(
+        final Table table = SqlTable.<ETeacher>create(
                 dbase,
                 "teacher",
-                ETeacher.values()
+                ETeacher.class //values()
         );
         table.initialize();
         {
@@ -53,6 +55,10 @@ class TableTest {
         }
         {
             int id = table.insertRow(ETeacher.LOCATION, "new location");
+            id += 0;
+        }
+        {
+            int id = table.insertRow(EBad.eFoo, "bad value");
             id += 0;
         }
         boolean stop = true;

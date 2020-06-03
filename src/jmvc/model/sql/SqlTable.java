@@ -5,23 +5,19 @@ import jmvc.Exception;
 import jmvc.model.Database;
 import jmvc.model.Table;
 
-import java.sql.SQLException;
-
 import java.sql.*;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static gblibx.Util.*;
 import static java.util.Objects.isNull;
 
-public class SqlTable extends Table {
-    public static SqlTable create(Database dbase, String name, Enum[] cols) {
+public class SqlTable<E extends Enum<E>> extends Table {
+
+    public static <E extends Enum<E>> SqlTable create(Database dbase, String name, Class<E> cols) {
         return new SqlTable(name, cols, dbase);
     }
 
-    private SqlTable(String name, Enum[] cols, Database dbase) {
+    private SqlTable(String name, Class<E> cols, Database dbase) {
         super(name, cols, dbase);
     }
 
@@ -82,7 +78,7 @@ public class SqlTable extends Table {
         StringBuilder xstmt = new StringBuilder(
                 String.format("CREATE TABLE %s (", name));
         int i = 0;
-        for (Enum colSpec : super._config) {
+        for (Enum<E> colSpec : super._config) {
             for (String c : _getColumnSpec(colSpec))
                 xstmt
                         .append((0 < i++) ? "," : "")
@@ -100,7 +96,7 @@ public class SqlTable extends Table {
     @Override
     public int insertRow(Object... colVals) {
         if (isNull(__insertRow)) {
-            __insertRow = new InsertRow();
+            __insertRow = new InsertRow<E>();
         }
         try {
             return __insertRow.execute(colVals);
@@ -111,7 +107,7 @@ public class SqlTable extends Table {
         }
     }
 
-    private static InsertRow __insertRow = null;
+    private InsertRow __insertRow = null;
 
     private static void __setValue(PreparedStatement pstmt, Object val, ColInfo col, int position) throws SQLException {
         if (0 > position) {
@@ -136,7 +132,7 @@ public class SqlTable extends Table {
     /**
      * Bookeeping for INSERT prepared statement
      */
-    private class InsertRow {
+    private class InsertRow<E extends Enum<E>> {
         private InsertRow() {
             __initialize();
         }
@@ -147,13 +143,16 @@ public class SqlTable extends Table {
             }
             PreparedStatement pstmt = __pstmt;
             for (int i = 0; i < colVals.length; ++i) {
-                final Enum col = castobj(colVals[i++]);
+                final E col = castobj(colVals[i++]);
+                if (! _isValidColumn(col)) {
+                    throw new Exception.TODO("Invalid column: "+ col.name());
+                }
                 final int ordinal = col.ordinal();
                 __setValue(pstmt, colVals[i], _colInfo[ordinal], __positionByOrdinal[ordinal]);
             }
             int rowCnt = pstmt.executeUpdate();
             if (1 != rowCnt) {
-                throw new SQLException("Expected 1 row");
+                throw new Exception.TODO("Expected 1 row");
             }
             int rval = -1;
             if (__hasID) {
@@ -161,7 +160,7 @@ public class SqlTable extends Table {
                 if (rs.next()) {
                     int colCnt = rs.getMetaData().getColumnCount();
                     if (1 != colCnt) {
-                        throw new SQLException("Unexpected column count: " + colCnt);
+                        throw new Exception.TODO("Unexpected column count: " + colCnt);
                     }
                     rval = rs.getInt(1);
                 }
