@@ -7,7 +7,7 @@ import java.util.EnumSet;
 import static gblibx.Util.castobj;
 import static gblibx.Util.isNonNull;
 
-public abstract class Table <E extends Enum<E>> {
+public abstract class Table<E extends Enum<E>> {
 
     protected Table(String name, Class<E> config, Database dbase) {
         this.name = name;
@@ -16,6 +16,11 @@ public abstract class Table <E extends Enum<E>> {
         this._dbase = dbase;
     }
 
+    /**
+     * All Enum values (columns).
+     *
+     * @return all Enum values.
+     */
     private Enum<E>[] __universe() {
         Enum<E> u[] = new Enum[_configSet.size()];
         for (Enum<E> e : _configSet) {
@@ -50,12 +55,23 @@ public abstract class Table <E extends Enum<E>> {
      * @param colName column name.
      * @return ordinal value.
      */
-    protected int _getColInfoIx(String colName) {
+    protected int _getColInfoOrdinal(String colName, boolean throwOnFail) {
         for (Enum<E> e : _config) {
             if (e.name().equalsIgnoreCase(colName))
                 return e.ordinal();
         }
-        throw new Exception.TODO("invalid column: " + colName);
+        if (throwOnFail)
+            throw new Exception.TODO("invalid column: " + colName);
+        else
+            return -1;
+    }
+
+    protected int _getColInfoOrdinal(String colName) {
+        return _getColInfoOrdinal(colName, true);
+    }
+
+    protected boolean _hasColumn(String colName) {
+        return 0 <= _getColInfoOrdinal(colName, false);
     }
 
     protected abstract void _setColumnInfo();
@@ -69,10 +85,19 @@ public abstract class Table <E extends Enum<E>> {
     /**
      * Insert a new row into table.
      *
-     * @param colVals pairs of Enum/col, value
+     * @param colVals pairs of Enum/col values.
      * @return generated ID or -1 if no ID.
      */
     public abstract int insertRow(Object... colVals);
+
+    /**
+     * Common variety UPDATE TABLE SET col1=val1... WHERE ID=id.
+     *
+     * @param id      ID value.
+     * @param colVals pairs of Enum/col values.
+     * @return updated ID or -1 if no update done.
+     */
+    public abstract int updatedTableById(int id, Object... colVals);
 
     public final String name;
     protected final Enum<E>[] _config;
