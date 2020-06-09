@@ -115,7 +115,12 @@ public class SqlTable<E extends Enum<E>> extends Table {
             __updateTableById = new UpdateTableById();
         }
         try {
-            return __updateTableById.__execute(id, colVals);
+            int rval = __updateTableById.__execute(id, colVals);
+            // We expect 0, since we cannot return value in MySql
+            if (0 != rval) {
+                throw new Exception.TODO("Expected 0");
+            }
+            return rval;
         } catch (SQLException ex) {
             //TODO: need to deal w/ exception here, since we dont propagate exception
             //through method signature.
@@ -295,7 +300,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
             }
             EnumSet<E> key = EnumSet.copyOf(cols);
             if (!__pstmtByCol.containsKey(key)) {
-                Integer positionByOrdinal[] = arrayFill(new Integer[_config.length], -1);
+                Integer[] positionByOrdinal = arrayFill(new Integer[_config.length], -1);
                 int currPos = 0;
                 StringBuilder stmt = new StringBuilder();
                 stmt
@@ -311,6 +316,10 @@ public class SqlTable<E extends Enum<E>> extends Table {
                             .append("=?");
                     final int ordinal = col.ordinal();
                     positionByOrdinal[ordinal] = ++currPos;
+                }
+                if (_hasColumn("UPDATED_AT")) {
+                    if (0 < currPos) stmt.append(',');
+                    stmt.append("UPDATED_AT=CURRENT_TIMESTAMP");
                 }
                 stmt.append(" WHERE ID=?");
                 positionByOrdinal[_getColInfoOrdinal("ID")] = ++currPos;

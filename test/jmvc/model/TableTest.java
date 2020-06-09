@@ -14,6 +14,7 @@ class TableTest {
     static enum ETeacher implements Table.ColSpec {
         ID("? INT NOT NULL GENERATED ALWAYS AS IDENTITY; PRIMARY KEY (?)"),
         LOCATION("? VARCHAR(255)"),
+        UPDATED_AT("? timestamp default current_timestamp"),
         CREATED_AT("? timestamp default current_timestamp");
 
         ETeacher(String spec) {
@@ -53,13 +54,20 @@ class TableTest {
             ResultSet rs = castobj(r);
             boolean stop = true;
         }
+        int lastId = 0;
         {
-            int id = table.insertRow(ETeacher.LOCATION, "new location");
-            id += 0;
+            lastId = table.insertRow(ETeacher.LOCATION, "new location");
         }
-        if (false){
-            int id = table.insertRow(EBad.eFoo, "bad value");
-            id += 0;
+        {
+            table.updatedTableById(lastId, ETeacher.LOCATION, "updated location");
+        }
+        if (true){  //this tests for bad column
+            try {
+                int id = table.insertRow(EBad.eFoo, "bad value");
+                id += 0;
+            } catch (Exception ex) {
+                System.err.println("Expected: " + ex.getMessage());
+            }
         }
         boolean stop = true;
     }

@@ -22,7 +22,7 @@ public abstract class Table<E extends Enum<E>> {
      * @return all Enum values.
      */
     private Enum<E>[] __universe() {
-        Enum<E> u[] = new Enum[_configSet.size()];
+        Enum<E>[] u = new Enum[_configSet.size()];
         for (Enum<E> e : _configSet) {
             u[e.ordinal()] = e;
         }
