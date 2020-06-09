@@ -145,6 +145,13 @@ public class SqlTable<E extends Enum<E>> extends Table {
         return __dbase().getMyConnection();
     }
 
+    private static void __executeUpdate(PreparedStatement pstmt) throws SQLException {
+        int rowCnt = pstmt.executeUpdate();
+        if (1 != rowCnt) {
+            throw new Exception.TODO("Expected 1 row");
+        }
+    }
+
     /**
      * Bookeeping for INSERT prepared statement
      */
@@ -159,10 +166,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
             }
             PreparedStatement pstmt = __pstmt;
             __setValues(pstmt, __positionByOrdinal, colVals);
-            int rowCnt = pstmt.executeUpdate();
-            if (1 != rowCnt) {
-                throw new Exception.TODO("Expected 1 row");
-            }
+            __executeUpdate(pstmt);
             return (__hasID) ? __getResultId(pstmt) : -1;
         }
 
@@ -259,20 +263,21 @@ public class SqlTable<E extends Enum<E>> extends Table {
         }
 
         private UpdateTableById() {
-            if (!_hasColumn("ID")) {
+            __idOrdinal = _getColInfoOrdinal("ID", false);
+            if (0 > __idOrdinal) {
                 throw new Exception.TODO("Table does not have ID column");
             }
         }
+
+        private final int __idOrdinal;
 
         private int __execute(int id, Object... colVals) throws SQLException {
             PstmtWithPos pstmtWithPos = __getPstmt(colVals);
             PreparedStatement pstmt = pstmtWithPos.__getPstmt();
             Integer[] positionByOrdinal = pstmtWithPos.__getPositionByOrdinal();
             __setValues(pstmt, positionByOrdinal, colVals);
-            int rowCnt = pstmt.executeUpdate();
-            if (1 != rowCnt) {
-                throw new Exception.TODO("Expected 1 row");
-            }
+            __setValue(pstmt, id, _colInfo[__idOrdinal], positionByOrdinal[__idOrdinal]);
+            __executeUpdate(pstmt);
             return __getResultId(pstmt);
         }
 
