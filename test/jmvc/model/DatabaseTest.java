@@ -23,7 +23,7 @@ class DatabaseTest {
                     "MyDbTestPasswd"
             );
             final Database dbase = Database.connect(config);
-            final Connection conn = SqlDatabase.myDbase(dbase).getMyConnection();
+            final Connection conn = SqlDatabase.myDbase(dbase).getConnection();
             assertTrue(conn.isValid(0));
             {
                 //todo: rsmd get info about cols.

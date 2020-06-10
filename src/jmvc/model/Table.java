@@ -4,16 +4,20 @@ import jmvc.Exception;
 
 import java.util.EnumSet;
 
-import static gblibx.Util.castobj;
-import static gblibx.Util.isNonNull;
+import static gblibx.Util.*;
 
 public abstract class Table<E extends Enum<E>> {
 
     protected Table(String name, Class<E> config, Database dbase) {
         this.name = name;
-        this._configSet = EnumSet.allOf(config);
-        this._config = __universe();
-        this._dbase = dbase;
+        _configSet = EnumSet.allOf(config);
+        _config = __universe();
+        _dbase = dbase;
+        _colEnumCls = config;
+    }
+
+    protected Enum<E> _getEnumOfCol(String col) {
+        return Enum.<E>valueOf(_colEnumCls, col.toUpperCase());
     }
 
     /**
@@ -97,12 +101,13 @@ public abstract class Table<E extends Enum<E>> {
      * @param colVals pairs of Enum/col values.
      * @return updated ID or -1 if no update done.
      */
-    public abstract int updatedTableById(int id, Object... colVals);
+    public abstract int updateTableById(int id, Object... colVals);
 
     public final String name;
     protected final Enum<E>[] _config;
     protected final EnumSet<E> _configSet;
     protected final Database _dbase;
+    protected final Class<E> _colEnumCls;
     /**
      * ColInfo by _config ordinal.
      */

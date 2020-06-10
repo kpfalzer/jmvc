@@ -1,13 +1,14 @@
 package jmvc.model;
 
 import jmvc.Config;
+import jmvc.model.sql.SqlDatabase;
 import jmvc.model.sql.SqlTable;
 import org.junit.jupiter.api.Test;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static gblibx.Util.castobj;
+import static gblibx.Util.downcast;
 
 class TableTest {
 
@@ -39,7 +40,7 @@ class TableTest {
                 "MyDbTestUser",
                 "MyDbTestPasswd"
         );
-        final Database dbase = Database.connect(config);
+        final SqlDatabase dbase = downcast(Database.connect(config));
         final Table table = SqlTable.<ETeacher>create(
                 dbase,
                 "teacher",
@@ -48,18 +49,18 @@ class TableTest {
         table.initialize();
         {
             String s = "INSERT INTO teacher(Location) VALUES ('here')";
-            dbase.executeStatement(s);
+            dbase.executeStatementNoResult(s);
             s = "SELECT * FROM teacher";
-            Object r = dbase.executeStatement(s);
-            ResultSet rs = castobj(r);
-            boolean stop = true;
+            final ResultSet rs = dbase.executeStatement(s);
+            dbase.close(rs);
         }
         int lastId = 0;
         {
             lastId = table.insertRow(ETeacher.LOCATION, "new location");
         }
         {
-            table.updatedTableById(lastId, ETeacher.LOCATION, "updated location");
+            table.updateTableById(lastId, ETeacher.LOCATION, "updated location");
+            table.updateTableById(lastId-1, ETeacher.LOCATION, "previous location");
         }
         if (true){  //this tests for bad column
             try {

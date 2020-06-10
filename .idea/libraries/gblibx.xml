@@ -4,6 +4,8 @@
       <root url="jar://$PROJECT_DIR$/../gblibx/out/artifacts/gblibx_jar/gblibx.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../gblibx/src" />
+    </SOURCES>
   </library>
 </component>

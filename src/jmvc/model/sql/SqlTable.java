@@ -7,6 +7,7 @@ import jmvc.model.Table;
 
 import java.sql.*;
 import java.util.*;
+import java.util.function.Function;
 
 import static gblibx.Util.*;
 import static java.util.Objects.isNull;
@@ -25,14 +26,43 @@ public class SqlTable<E extends Enum<E>> extends Table {
         return SqlDatabase.myDbase(_dbase);
     }
 
+    private void __close(Connection conn) {
+        __dbase().close(conn);
+    }
+
+    /**
+     * Close ResultSet, Statement and Connection.
+     * NOTE: only use at very end of connection use.
+     *
+     * @param rs
+     */
+    private void __close(ResultSet rs) {
+        __dbase().close(rs);
+    }
+
+    private void __close(Statement stmt) {
+        __dbase().close(stmt);
+    }
+
+    /**
+     * Get DatabaseMetaData.
+     * Resources are not closed here.
+     *
+     * @return DatabaseMetaData.
+     */
     private DatabaseMetaData __getMetaData() {
+        final Connection conn = __connection();
+        SQLException exception = null;
+        DatabaseMetaData dmd = null;
         try {
-            return __dbase()
-                    .getMyConnection()
-                    .getMetaData();
+            dmd = conn.getMetaData();
         } catch (SQLException e) {
-            throw new Exception.TODO(e);
+            exception = e;
         }
+        if (isNonNull(exception)) {
+            throw new Exception.TODO(exception);
+        }
+        return dmd;
     }
 
     @Override
@@ -40,20 +70,29 @@ public class SqlTable<E extends Enum<E>> extends Table {
         _colInfo = new ColInfo[_config.length];
         final String tblName = upcase(name);
         Set<String> primaryKeys = new HashSet<>();
+        ResultSet rs = null;
+        SQLException exception = null;
         try {
-            ResultSet rs = __getMetaData()
+            rs = __getMetaData()
                     .getPrimaryKeys(null, null, tblName);
             while (rs.next()) {
                 primaryKeys.add(rs.getString("COLUMN_NAME"));
             }
+            rs.close();
             rs = __getMetaData()
                     .getColumns(null, null, tblName, null);
             while (rs.next()) {
                 Util.Pair<String, ColInfo> info = __create(rs, primaryKeys);
                 _colInfo[_getColInfoOrdinal(info.v1)] = info.v2;
             }
+            //rs.close -> __close(rs) for thorough cleanup
         } catch (SQLException e) {
-            throw new Exception.TODO(e);
+            exception = e;
+        } finally {
+            __close(rs);
+        }
+        if (isNonNull(exception)) {
+            throw new Exception.TODO(exception);
         }
     }
 
@@ -86,17 +125,13 @@ public class SqlTable<E extends Enum<E>> extends Table {
                         .append(c);
         }
         xstmt.append(")");
-        try {
-            _dbase.executeStatement(xstmt.toString());
-        } catch (Exception ex) {
-            throw new Exception.TODO(ex);
-        }
+        __dbase().executeStatementNoResult(xstmt.toString());
     }
 
     @Override
     public int insertRow(Object... colVals) {
         if (isNull(__insertRow)) {
-            __insertRow = new InsertRow<E>();
+            __insertRow = new __InsertRow<E>();
         }
         try {
             return __insertRow.__execute(colVals);
@@ -107,12 +142,12 @@ public class SqlTable<E extends Enum<E>> extends Table {
         }
     }
 
-    private InsertRow __insertRow = null;
+    private __InsertRow __insertRow = null;
 
     @Override
-    public int updatedTableById(int id, Object... colVals) {
+    public int updateTableById(int id, Object... colVals) {
         if (isNull(__updateTableById)) {
-            __updateTableById = new UpdateTableById();
+            __updateTableById = new __UpdateTableById();
         }
         try {
             int rval = __updateTableById.__execute(id, colVals);
@@ -120,34 +155,20 @@ public class SqlTable<E extends Enum<E>> extends Table {
             if (0 != rval) {
                 throw new Exception.TODO("Expected 0");
             }
-            return rval;
+            //return same id
+            return id;
         } catch (SQLException ex) {
             //TODO: need to deal w/ exception here, since we dont propagate exception
             //through method signature.
-            throw new Exception.TODO(ex);
+            //TODO: log message;
+            return -1;
         }
     }
 
-    private UpdateTableById __updateTableById = null;
-
-    private static void __setValue(PreparedStatement pstmt, Object val, ColInfo col, int position) throws SQLException {
-        if (0 > position) {
-            throw new SQLException("Invalid position: " + position);
-        }
-        switch (col.type) {
-            case Types.INTEGER:
-                pstmt.setInt(position, castobj(val));
-                break;
-            case Types.VARCHAR:
-                pstmt.setString(position, castobj(val));
-                break;
-            default:
-                throw new SQLException("Invalid type: " + col.type);
-        }
-    }
+    private __UpdateTableById __updateTableById = null;
 
     private Connection __connection() {
-        return __dbase().getMyConnection();
+        return __dbase().getConnection();
     }
 
     private static void __executeUpdate(PreparedStatement pstmt) throws SQLException {
@@ -160,31 +181,35 @@ public class SqlTable<E extends Enum<E>> extends Table {
     /**
      * Bookeeping for INSERT prepared statement
      */
-    private class InsertRow<E extends Enum<E>> {
-        private InsertRow() {
+    private class __InsertRow<E extends Enum<E>> {
+        private __InsertRow() {
             __initialize();
         }
 
         private int __execute(Object... colVals) throws SQLException {
-            if ((2 * __numPositions) != colVals.length) {
+            if ((2 * __pstmt.numPositions) != colVals.length) {
                 throw new Exception.TODO("Invalid # of values");
             }
-            PreparedStatement pstmt = __pstmt;
-            __setValues(pstmt, __positionByOrdinal, colVals);
+            final Connection conn = __connection();
+            PreparedStatement pstmt = (__hasID)
+                    ? __pstmt.getPreparedStatement(conn, Statement.RETURN_GENERATED_KEYS, colVals)
+                    : __pstmt.getPreparedStatement(conn, colVals);
             __executeUpdate(pstmt);
-            return (__hasID) ? __getResultId(pstmt) : -1;
+            final int id = (__hasID) ? __getResultId(pstmt) : -1;
+            __pstmt.close();
+            return id;
         }
 
         private void __initialize() {
-            __positionByOrdinal = new Integer[_config.length];
+            Integer[] positionByOrdinal = new Integer[_config.length];
             List<String> colNames = new LinkedList<>();
             for (Enum col : _config) {
                 final int ordinal = col.ordinal();
                 if (!_colInfo[ordinal].hasDefaultVal()) {
                     colNames.add(col.name().toUpperCase());
-                    __positionByOrdinal[ordinal] = ++__numPositions;
+                    positionByOrdinal[ordinal] = ++__numPositions;
                 } else {
-                    __positionByOrdinal[ordinal] = -1;
+                    positionByOrdinal[ordinal] = -1;
                     __hasID |= col.name().equalsIgnoreCase("ID");
                 }
             }
@@ -199,23 +224,10 @@ public class SqlTable<E extends Enum<E>> extends Table {
                     .append(join(arrayFill(new String[colNames.size()], "?"), ","))
                     .append(')')
             ;
-            try {
-                if (__hasID) {
-                    __pstmt = __connection().prepareStatement(stmt.toString(), Statement.RETURN_GENERATED_KEYS);
-                } else {
-                    __pstmt = __connection().prepareStatement(stmt.toString());
-                }
-            } catch (SQLException ex) {
-                throw new Exception.TODO(ex);
-            }
+            __pstmt = new PreparedStatementX(stmt.toString(), positionByOrdinal, __getOrdinal, _colInfo);
         }
 
-        /**
-         * Position in PreparedStatement by ordinal (of enum value).
-         * Or, <0 for names/columns NOT in PreparedStatement.
-         */
-        private Integer[] __positionByOrdinal;
-        private PreparedStatement __pstmt;
+        private PreparedStatementX __pstmt;
         private int __numPositions = 0;
         private boolean __hasID = false;
     }
@@ -229,63 +241,45 @@ public class SqlTable<E extends Enum<E>> extends Table {
                 throw new Exception.TODO("Unexpected column count: " + colCnt);
             }
             rval = rs.getInt(1);
+            rs.close();
         }
         return rval;
     }
 
-    private void __setValues(PreparedStatement pstmt, Integer[] positionByOrdinal, Object... colVals) throws SQLException {
-        for (int i = 0; i < colVals.length; ++i) {
-            final E col = castobj(colVals[i++]);
+    private final Function<Object, Integer> __getOrdinal = new Function<Object, Integer>() {
+        @Override
+        public Integer apply(Object o) {
+            final E col = castobj(o);
             if (!_isValidColumn(col)) {
                 throw new Exception.TODO("Invalid column: " + col.name());
             }
-            final int ordinal = col.ordinal();
-            __setValue(pstmt, colVals[i], _colInfo[ordinal], positionByOrdinal[ordinal]);
+            return col.ordinal();
         }
-    }
+    };
 
     /**
      * Bookeeping for UPDATE...WHERE ID=... prepared statement
      *
      * @param <E>
      */
-    private class UpdateTableById<E extends Enum<E>> {
-        /**
-         * Convenience class to wrap PreparedStatement with its positionByOrdinal
-         */
-        private class PstmtWithPos extends Pair<PreparedStatement, Integer[]> {
-            private PstmtWithPos(PreparedStatement pstmt, Integer[] posByOrdinal) {
-                super(pstmt, posByOrdinal);
-            }
-
-            private PreparedStatement __getPstmt() {
-                return super.v1;
-            }
-
-            private Integer[] __getPositionByOrdinal() {
-                return super.v2;
-            }
-        }
-
-        private UpdateTableById() {
-            __idOrdinal = _getColInfoOrdinal("ID", false);
-            if (0 > __idOrdinal) {
+    private class __UpdateTableById<E extends Enum<E>> {
+        private __UpdateTableById() {
+            final int id = _getColInfoOrdinal("ID", false);
+            if (0 > id) {
                 throw new Exception.TODO("Table does not have ID column");
             }
         }
 
-        private final int __idOrdinal;
-
-        private int __execute(int id, Object... colVals) throws SQLException {
-            PstmtWithPos pstmtWithPos = __getPstmt(colVals);
-            PreparedStatement pstmt = pstmtWithPos.__getPstmt();
-            Integer[] positionByOrdinal = pstmtWithPos.__getPositionByOrdinal();
-            __setValues(pstmt, positionByOrdinal, colVals);
-            __setValue(pstmt, id, _colInfo[__idOrdinal], positionByOrdinal[__idOrdinal]);
+        private int __execute(int id, Object... xcolVals) throws SQLException {
+            PreparedStatementX pstmtx = __getPstmt(xcolVals);
+            //Then add ID
+            Object[] colVals = append(xcolVals, _getEnumOfCol("ID"), id);
+            PreparedStatement pstmt = pstmtx.getPreparedStatement(__connection(), Statement.RETURN_GENERATED_KEYS, colVals);
             __executeUpdate(pstmt);
-            return __getResultId(pstmt);
+            final int rid = __getResultId(pstmt);
+            pstmtx.close();
+            return rid;
         }
-
 
         /**
          * Get PreparedStatement for columns in colVals.
@@ -293,10 +287,10 @@ public class SqlTable<E extends Enum<E>> extends Table {
          * @param colVals pairs of col,value.
          * @return PreparedStatement.
          */
-        private PstmtWithPos __getPstmt(Object... colVals) throws SQLException {
+        private PreparedStatementX __getPstmt(Object... colVals) throws SQLException {
             List<E> cols = new LinkedList();
             for (int i = 0; i < colVals.length; i += 2) {
-                cols.add(castobj(colVals[i * 2]));
+                cols.add(castobj(colVals[i]));
             }
             EnumSet<E> key = EnumSet.copyOf(cols);
             if (!__pstmtByCol.containsKey(key)) {
@@ -323,12 +317,11 @@ public class SqlTable<E extends Enum<E>> extends Table {
                 }
                 stmt.append(" WHERE ID=?");
                 positionByOrdinal[_getColInfoOrdinal("ID")] = ++currPos;
-                final PreparedStatement pstmt = __connection().prepareStatement(stmt.toString(), Statement.RETURN_GENERATED_KEYS);
-                __pstmtByCol.put(key, new PstmtWithPos(pstmt, positionByOrdinal));
+                __pstmtByCol.put(key, new PreparedStatementX(stmt.toString(), positionByOrdinal, __getOrdinal, _colInfo));
             }
             return __pstmtByCol.get(key);
         }
 
-        private Map<EnumSet<E>, PstmtWithPos> __pstmtByCol = new HashMap<>();
+        private Map<EnumSet<E>, PreparedStatementX> __pstmtByCol = new HashMap<>();
     }
 }

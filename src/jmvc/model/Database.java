@@ -31,13 +31,8 @@ public abstract class Database {
         return dbase;
     }
 
-    protected Connection _getConnection() {
-        return __connection;
-    }
-
-    protected Database(Config config, Connection conn) {
+    protected Database(Config config) {
         _config = config;
-        __connection = conn;
     }
 
     public abstract String getSchema();
@@ -53,8 +48,6 @@ public abstract class Database {
     }
 
     public abstract boolean hasTable(String shortTblName);
-
-    public abstract Object executeStatement(String statement);
 
     public static final String URL = "url";
     public static final String NAME = "name";
@@ -75,7 +68,6 @@ public abstract class Database {
     }
 
     protected final Config _config;
-    private final Connection __connection;
 
     public static final String SCHEMA = System.getProperty("db.schema", "DEVELOPMENT");
 }
