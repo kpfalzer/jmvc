@@ -11,12 +11,12 @@ public abstract class Table<E extends Enum<E>> {
     protected Table(String name, Class<E> config, Database dbase) {
         this.name = name;
         _configSet = EnumSet.allOf(config);
-        _config = __universe();
+        _config = universe();
         _dbase = dbase;
         _colEnumCls = config;
     }
 
-    protected Enum<E> _getEnumOfCol(String col) {
+    protected Enum<E> getEnumOfCol(String col) {
         return Enum.<E>valueOf(_colEnumCls, col.toUpperCase());
     }
 
@@ -25,7 +25,7 @@ public abstract class Table<E extends Enum<E>> {
      *
      * @return all Enum values.
      */
-    private Enum<E>[] __universe() {
+    private Enum<E>[] universe() {
         Enum<E>[] u = new Enum[_configSet.size()];
         for (Enum<E> e : _configSet) {
             u[e.ordinal()] = e;
@@ -40,7 +40,7 @@ public abstract class Table<E extends Enum<E>> {
         public String getSpec();
     }
 
-    protected String[] _getColumnSpec(Enum<E> e) {
+    protected String[] getColumnSpec(Enum<E> e) {
         final ColSpec specObj = castobj(e);
         return specObj.getSpec().replace("?", e.name()).split("\\s*;\\s*");
     }
@@ -48,9 +48,9 @@ public abstract class Table<E extends Enum<E>> {
     public void initialize() {
         boolean hasTable = _dbase.hasTable(name);
         if (!hasTable) {
-            _createTable();
+            createTable();
         }
-        _setColumnInfo();
+        setColumnInfo();
     }
 
     /**
@@ -59,7 +59,7 @@ public abstract class Table<E extends Enum<E>> {
      * @param colName column name.
      * @return ordinal value.
      */
-    protected int _getColInfoOrdinal(String colName, boolean throwOnFail) {
+    protected int getColInfoOrdinal(String colName, boolean throwOnFail) {
         for (Enum<E> e : _config) {
             if (e.name().equalsIgnoreCase(colName))
                 return e.ordinal();
@@ -70,19 +70,19 @@ public abstract class Table<E extends Enum<E>> {
             return -1;
     }
 
-    protected int _getColInfoOrdinal(String colName) {
-        return _getColInfoOrdinal(colName, true);
+    protected int getColInfoOrdinal(String colName) {
+        return getColInfoOrdinal(colName, true);
     }
 
-    protected boolean _hasColumn(String colName) {
-        return 0 <= _getColInfoOrdinal(colName, false);
+    protected boolean hasColumn(String colName) {
+        return 0 <= getColInfoOrdinal(colName, false);
     }
 
-    protected abstract void _setColumnInfo();
+    protected abstract void setColumnInfo();
 
-    protected abstract void _createTable();
+    protected abstract void createTable();
 
-    protected boolean _isValidColumn(Enum<E> col) {
+    protected boolean isValidColumn(Enum<E> col) {
         return _configSet.contains(col);
     }
 

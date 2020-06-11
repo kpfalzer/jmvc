@@ -22,7 +22,7 @@ public class SqlDatabase extends Database {
         } catch (SQLException e) {
             exception = e;
         } finally {
-            close(conn);
+            xclose(conn);
         }
         if (isNonNull(exception)) {
             throw new Exception.TODO(exception);
@@ -35,7 +35,7 @@ public class SqlDatabase extends Database {
     }
 
     public static void sclose(Connection conn) {
-        __close(conn);
+        SqlDatabase.xclose(conn);
     }
 
     public void close(Statement stmt) {
@@ -50,7 +50,7 @@ public class SqlDatabase extends Database {
             } catch (SQLException e) {
                 ;//ignore
             }
-        __close(stmt, conn);
+        xclose(stmt, conn);
     }
 
     public void close(ResultSet rs) {
@@ -95,7 +95,7 @@ public class SqlDatabase extends Database {
     }
 
     public static void sclose(Connection conn, Statement stmt, ResultSet rs) {
-        __close(rs, stmt, conn);
+        xclose(rs, stmt, conn);
     }
 
     /**
@@ -104,7 +104,7 @@ public class SqlDatabase extends Database {
      *
      * @param closeables AutoCloseable items.
      */
-    private static void __close(AutoCloseable... closeables) {
+    private static void xclose(AutoCloseable... closeables) {
         for (AutoCloseable ele : closeables) {
             if (isNonNull(ele)) {
                 try {
@@ -129,7 +129,7 @@ public class SqlDatabase extends Database {
         } catch (SQLException e) {
             exception = e;
         } finally {
-            close(conn, rs);
+            xclose(conn, rs);
         }
         if (isNonNull(exception)) {
             throw new Exception.TODO(exception);
@@ -145,7 +145,7 @@ public class SqlDatabase extends Database {
             connection = DriverManager.getConnection(config.requireProperty(URL), config);
             connection.setSchema(SCHEMA);
         } catch (SQLException ex) {
-            close(connection);
+            xclose(connection);
             throw new Exception.TODO(ex);
         }
         return connection;
@@ -156,14 +156,14 @@ public class SqlDatabase extends Database {
     }
 
     public void executeStatementNoResult(String statement) {
-        __executeStatement(statement, false);
+        executeStatement(statement, false);
     }
 
     public ResultSet executeStatement(String statement) {
-        return __executeStatement(statement, true);
+        return executeStatement(statement, true);
     }
 
-    private ResultSet __executeStatement(String statement, boolean hasResult) {
+    private ResultSet executeStatement(String statement, boolean hasResult) {
         final Connection conn = getConnection();
         Statement stmt = null;
         ResultSet rset = null;
@@ -176,7 +176,7 @@ public class SqlDatabase extends Database {
         } catch (SQLException e) {
             exception = e;
         } finally {
-            __close(stmt, conn);
+            xclose(stmt, conn);
         }
         if (isNonNull(exception)) {
             throw new Exception.TODO(exception);

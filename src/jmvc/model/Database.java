@@ -17,7 +17,7 @@ import static gblibx.Util.invariant;
 public abstract class Database {
     public static Database connect(Config config) {
         final String url = config.requireProperty(URL);
-        final String type = __getDbaseType(url);
+        final String type = getDbaseType(url);
         Database dbase = null;
         switch (type) {
             case "derby":   //fall through
@@ -61,7 +61,7 @@ public abstract class Database {
 
     private static final Pattern __PATTERN = Pattern.compile("jdbc:([^:]+):.+");
 
-    private static String __getDbaseType(String url) {
+    private static String getDbaseType(String url) {
         final Matcher matcher = __PATTERN.matcher(url);
         invariant(matcher.matches());
         return matcher.group(1);

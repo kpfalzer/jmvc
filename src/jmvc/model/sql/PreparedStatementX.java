@@ -28,30 +28,30 @@ public class PreparedStatementX implements AutoCloseable {
     }
 
     public PreparedStatement getPreparedStatement(Connection conn, int keys, Object... colVals) throws SQLException {
-        return __setPreparedStatement(conn, keys)
-                .__setValues(colVals)
+        return setPreparedStatement(conn, keys)
+                .setValues(colVals)
                 .__pstmt;
     }
 
     public PreparedStatement getPreparedStatement(Connection conn, Object... colVals) throws SQLException {
-        return __setPreparedStatement(conn)
-                .__setValues(colVals)
+        return setPreparedStatement(conn)
+                .setValues(colVals)
                 .__pstmt;
     }
 
-    private PreparedStatementX __setPreparedStatement(Connection conn) throws SQLException {
+    private PreparedStatementX setPreparedStatement(Connection conn) throws SQLException {
         close();
         __pstmt = conn.prepareStatement(__stmt);
         return this;
     }
 
-    private PreparedStatementX __setPreparedStatement(Connection conn, int keys) throws SQLException {
+    private PreparedStatementX setPreparedStatement(Connection conn, int keys) throws SQLException {
         close();
         __pstmt = conn.prepareStatement(__stmt, keys);
         return this;
     }
 
-    private void __setValue(Object val, Table.ColInfo col, int position) throws SQLException {
+    private void setValue(Object val, Table.ColInfo col, int position) throws SQLException {
         if (0 > position) {
             throw new SQLException("Invalid position: " + position);
         }
@@ -67,10 +67,10 @@ public class PreparedStatementX implements AutoCloseable {
         }
     }
 
-    private PreparedStatementX __setValues(Object... colVals) throws SQLException {
+    private PreparedStatementX setValues(Object... colVals) throws SQLException {
         for (int i = 0; i < colVals.length; ++i) {
             final int ordinal = __getOrdinal.apply(colVals[i++]);
-            __setValue(colVals[i], __colInfo[ordinal], __positionByOrdinal[ordinal]);
+            setValue(colVals[i], __colInfo[ordinal], __positionByOrdinal[ordinal]);
         }
         return this;
     }
