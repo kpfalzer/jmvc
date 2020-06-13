@@ -37,6 +37,13 @@ public abstract class Database {
 
     public abstract String getSchema();
 
+    /**
+     * Quesry database.
+     * @param statement Query command.
+     * @return query result.
+     */
+    public abstract Object query(String statement);
+
     public String name() {
         return _config.requireProperty(NAME);
     }

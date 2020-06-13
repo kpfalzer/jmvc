@@ -1,3 +1,6 @@
+Useful info on dbase Join here:
+https://docs.oracle.com/javase/8/docs/api/javax/sql/rowset/JoinRowSet.html
+
 created test dbase:
 //https://docs.bitnami.com/aws/infrastructure/mariadb/configuration/create-database/
 MariaDB [(none)]> grant all privileges on foobar.* TO 'foobaruser'@'localhost' identified by 'foobarpasswd';

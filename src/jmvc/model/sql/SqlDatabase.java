@@ -30,6 +30,11 @@ public class SqlDatabase extends Database {
         return schema;
     }
 
+    @Override
+    public Object query(String statement) {
+        return QueryResult.executeQuery(this, statement);
+    }
+
     public void close(Connection conn) {
         sclose(conn);
     }

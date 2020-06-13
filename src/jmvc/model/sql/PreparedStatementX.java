@@ -17,12 +17,12 @@ import static gblibx.Util.isNonNull;
  */
 public class PreparedStatementX implements AutoCloseable {
     public PreparedStatementX(String stmt, Integer[] positionByOrdinal, Function<Object, Integer> getOrdinal, Table.ColInfo[] colInfo) {
-        __stmt = stmt;
-        __positionByOrdinal = positionByOrdinal;
-        __getOrdinal = getOrdinal;
-        __colInfo = colInfo;
+        _stmt = stmt;
+        _positionByOrdinal = positionByOrdinal;
+        _getOrdinal = getOrdinal;
+        _colInfo = colInfo;
         numPositions = (int)Arrays
-                .stream(__positionByOrdinal)
+                .stream(_positionByOrdinal)
                 .filter(i -> (0 <= i))
                 .count();
     }
@@ -30,24 +30,24 @@ public class PreparedStatementX implements AutoCloseable {
     public PreparedStatement getPreparedStatement(Connection conn, int keys, Object... colVals) throws SQLException {
         return setPreparedStatement(conn, keys)
                 .setValues(colVals)
-                .__pstmt;
+                ._pstmt;
     }
 
     public PreparedStatement getPreparedStatement(Connection conn, Object... colVals) throws SQLException {
         return setPreparedStatement(conn)
                 .setValues(colVals)
-                .__pstmt;
+                ._pstmt;
     }
 
     private PreparedStatementX setPreparedStatement(Connection conn) throws SQLException {
         close();
-        __pstmt = conn.prepareStatement(__stmt);
+        _pstmt = conn.prepareStatement(_stmt);
         return this;
     }
 
     private PreparedStatementX setPreparedStatement(Connection conn, int keys) throws SQLException {
         close();
-        __pstmt = conn.prepareStatement(__stmt, keys);
+        _pstmt = conn.prepareStatement(_stmt, keys);
         return this;
     }
 
@@ -57,10 +57,10 @@ public class PreparedStatementX implements AutoCloseable {
         }
         switch (col.type) {
             case Types.INTEGER:
-                __pstmt.setInt(position, castobj(val));
+                _pstmt.setInt(position, castobj(val));
                 break;
             case Types.VARCHAR:
-                __pstmt.setString(position, castobj(val));
+                _pstmt.setString(position, castobj(val));
                 break;
             default:
                 throw new SQLException("Invalid type: " + col.type);
@@ -69,24 +69,24 @@ public class PreparedStatementX implements AutoCloseable {
 
     private PreparedStatementX setValues(Object... colVals) throws SQLException {
         for (int i = 0; i < colVals.length; ++i) {
-            final int ordinal = __getOrdinal.apply(colVals[i++]);
-            setValue(colVals[i], __colInfo[ordinal], __positionByOrdinal[ordinal]);
+            final int ordinal = _getOrdinal.apply(colVals[i++]);
+            setValue(colVals[i], _colInfo[ordinal], _positionByOrdinal[ordinal]);
         }
         return this;
     }
 
-    private final String __stmt;
-    public final Integer[] __positionByOrdinal;
-    private final Function<Object, Integer> __getOrdinal;
-    private final Table.ColInfo[] __colInfo;
-    private PreparedStatement __pstmt = null;
+    private final String _stmt;
+    public final Integer[] _positionByOrdinal;
+    private final Function<Object, Integer> _getOrdinal;
+    private final Table.ColInfo[] _colInfo;
+    private PreparedStatement _pstmt = null;
     public final int numPositions;
 
     @Override
     public void close() {
-        if (isNonNull(__pstmt)) {
-            SqlDatabase.sclose(__pstmt);
-            __pstmt = null;
+        if (isNonNull(_pstmt)) {
+            SqlDatabase.sclose(_pstmt);
+            _pstmt = null;
         }
     }
 }

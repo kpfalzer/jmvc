@@ -5,6 +5,7 @@ exec java -jar ./derbyrun.jar ij <<EOF
 connect 'jdbc:derby://localhost:3308/MyDbTest' USER 'MyDbTestUser' PASSWORD 'MyDbTestPasswd' ;
 show tables;
 set schema DEVELOPMENT;
-select * from TEACHER;
+select * from TEACHERS;
+select * from STUDENTS;
 exit;
 EOF

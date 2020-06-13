@@ -20,6 +20,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
 
     private SqlTable(String name, Class<E> cols, Database dbase) {
         super(name, cols, dbase);
+        super.initialize();
     }
 
     private SqlDatabase dbase() {
@@ -130,11 +131,11 @@ public class SqlTable<E extends Enum<E>> extends Table {
 
     @Override
     public int insertRow(Object... colVals) {
-        if (isNull(__insertRow)) {
-            __insertRow = new InsertRow<E>();
+        if (isNull(_insertRow)) {
+            _insertRow = new InsertRow<E>();
         }
         try {
-            return __insertRow.execute(colVals);
+            return _insertRow.execute(colVals);
         } catch (SQLException ex) {
             //TODO: need to deal w/ exception here, since we dont propagate exception
             //through method signature.
@@ -142,15 +143,15 @@ public class SqlTable<E extends Enum<E>> extends Table {
         }
     }
 
-    private InsertRow __insertRow = null;
+    private InsertRow _insertRow = null;
 
     @Override
     public int updateTableById(int id, Object... colVals) {
-        if (isNull(__updateTableById)) {
-            __updateTableById = new UpdateTableById();
+        if (isNull(_updateTableById)) {
+            _updateTableById = new UpdateTableById();
         }
         try {
-            int rval = __updateTableById.execute(id, colVals);
+            int rval = _updateTableById.execute(id, colVals);
             // We expect 0, since we cannot return value in MySql
             if (0 != rval) {
                 throw new Exception.TODO("Expected 0");
@@ -165,7 +166,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
         }
     }
 
-    private UpdateTableById __updateTableById = null;
+    private UpdateTableById _updateTableById = null;
 
     private Connection connection() {
         return dbase().getConnection();

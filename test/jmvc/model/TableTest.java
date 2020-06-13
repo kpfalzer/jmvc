@@ -1,20 +1,21 @@
 package jmvc.model;
 
 import jmvc.Config;
+import jmvc.model.sql.QueryResult;
 import jmvc.model.sql.SqlDatabase;
 import jmvc.model.sql.SqlTable;
 import org.junit.jupiter.api.Test;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static gblibx.Util.castobj;
 import static gblibx.Util.downcast;
 
 class TableTest {
 
     static enum ETeacher implements Table.ColSpec {
         ID("? INT NOT NULL GENERATED ALWAYS AS IDENTITY; PRIMARY KEY (?)"),
-        LOCATION("? VARCHAR(255)"),
+        NAME("? VARCHAR(255)"),
         UPDATED_AT("? timestamp default current_timestamp"),
         CREATED_AT("? timestamp default current_timestamp");
 
@@ -30,7 +31,25 @@ class TableTest {
         }
     }
 
-    static enum EBad {eFoo};
+    static enum EStudent implements Table.ColSpec {
+        ID("? INT NOT NULL GENERATED ALWAYS AS IDENTITY; PRIMARY KEY (?)"),
+        NAME("? VARCHAR(255) NOT NULL"),
+        TEACHER_ID("? INT NOT NULL"),
+        GRADE("? VARCHAR(1) default '_'"),
+        UPDATED_AT("? timestamp default current_timestamp"),
+        CREATED_AT("? timestamp default current_timestamp");
+
+        EStudent(String spec) {
+            __spec = spec;
+        }
+
+        final String __spec;
+
+        @Override
+        public String getSpec() {
+            return __spec;
+        }
+    }
 
     @Test
     void getConfig() throws SQLException {
@@ -41,35 +60,43 @@ class TableTest {
                 "MyDbTestPasswd"
         );
         final SqlDatabase dbase = downcast(Database.connect(config));
-        final Table table = SqlTable.<ETeacher>create(
+        final Table<ETeacher> Teachers = SqlTable.create(
                 dbase,
-                "teacher",
+                "teachers",
                 ETeacher.class //values()
         );
-        table.initialize();
-        {
-            String s = "INSERT INTO teacher(Location) VALUES ('here')";
-            dbase.executeStatementNoResult(s);
-            s = "SELECT * FROM teacher";
-            final ResultSet rs = dbase.executeStatement(s);
-            dbase.close(rs);
+        final Table<EStudent> Students = SqlTable.create(
+                dbase,
+                "students",
+                EStudent.class
+        );
+        if (false) {
+            int id = Teachers.insertRow(ETeacher.NAME, "teacherVal1");
+            Students.insertRow(
+                    EStudent.NAME, "studentVal1",
+                    EStudent.TEACHER_ID, id
+                    );
+        } else {
+            final String query =
+                    "SELECT * FROM STUDENTS" +
+                            " INNER JOIN TEACHERS" +
+                            " ON TEACHER_ID = TEACHERS.ID"
+                    ;
+            QueryResult result = castobj(dbase.query(query));
+            int nrows = result.nrows();
+            boolean stop = true;
         }
-        int lastId = 0;
-        {
-            lastId = table.insertRow(ETeacher.LOCATION, "new location");
-        }
+        /*
         {
             table.updateTableById(lastId, ETeacher.LOCATION, "updated location");
             table.updateTableById(lastId-1, ETeacher.LOCATION, "previous location");
         }
-        if (true){  //this tests for bad column
-            try {
-                int id = table.insertRow(EBad.eFoo, "bad value");
-                id += 0;
-            } catch (Exception ex) {
-                System.err.println("Expected: " + ex.getMessage());
-            }
+        {
+            QueryResult result = castobj(dbase.query("SELECT * FROM TEACHER"));
+            int nrows = result.nrows();
+            assertEquals(nrows, lastId);
         }
+        */
         boolean stop = true;
     }
 }
