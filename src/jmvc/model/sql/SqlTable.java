@@ -2,12 +2,15 @@ package jmvc.model.sql;
 
 import gblibx.Util;
 import jmvc.Exception;
+import jmvc.model.ColumnInfo;
 import jmvc.model.Database;
 import jmvc.model.Table;
 
 import java.sql.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static gblibx.Util.*;
 import static java.util.Objects.isNull;
@@ -68,7 +71,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
 
     @Override
     protected void setColumnInfo() {
-        _colInfo = new ColInfo[_config.length];
+        _colInfo = new ColumnInfo[_config.length];
         final String tblName = upcase(name);
         Set<String> primaryKeys = new HashSet<>();
         ResultSet rs = null;
@@ -83,7 +86,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
             rs = getMetaData()
                     .getColumns(null, null, tblName, null);
             while (rs.next()) {
-                Util.Pair<String, ColInfo> info = create(rs, primaryKeys);
+                Util.Pair<String, ColumnInfo> info = create(rs, primaryKeys);
                 _colInfo[getColInfoOrdinal(info.v1)] = info.v2;
             }
             //rs.close -> __close(rs) for thorough cleanup
@@ -97,10 +100,13 @@ public class SqlTable<E extends Enum<E>> extends Table {
         }
     }
 
-    private static Util.Pair<String, ColInfo> create(ResultSet rs, Set<String> pk) {
+    private Util.Pair<String, ColumnInfo> create(ResultSet rs, Set<String> pk) {
         try {
             final String name = rs.getString("COLUMN_NAME");
-            final ColInfo info = new ColInfo(
+            final ColumnInfo info = new ColumnInfo(
+                    dbase(),
+                    this,
+                    name,
                     rs.getInt("DATA_TYPE"),
                     rs.getInt("COLUMN_SIZE"),
                     rs.getInt("ORDINAL_POSITION"),
@@ -164,6 +170,18 @@ public class SqlTable<E extends Enum<E>> extends Table {
             //TODO: log message;
             return -1;
         }
+    }
+
+    @Override
+    public Object findById(Stream ids, boolean orderByIdAsc) {
+        String csv = ((Stream<Integer>)ids)
+                .map(e -> e.toString())
+                .collect(Collectors.joining(","));
+        String query = String.format(
+          "SELECT * FROM %s WHERE ID in (%s) ORDER BY ID %s",
+          name, csv, ((orderByIdAsc) ? "ASC" : "DESC")
+        );
+        return dbase().query(query);
     }
 
     private UpdateTableById _updateTableById = null;

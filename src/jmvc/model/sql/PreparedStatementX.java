@@ -1,6 +1,6 @@
 package jmvc.model.sql;
 
-import jmvc.model.Table;
+import jmvc.model.ColumnInfo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,7 +16,7 @@ import static gblibx.Util.isNonNull;
  * Manage PreparedStatement.
  */
 public class PreparedStatementX implements AutoCloseable {
-    public PreparedStatementX(String stmt, Integer[] positionByOrdinal, Function<Object, Integer> getOrdinal, Table.ColInfo[] colInfo) {
+    public PreparedStatementX(String stmt, Integer[] positionByOrdinal, Function<Object, Integer> getOrdinal, ColumnInfo[] colInfo) {
         _stmt = stmt;
         _positionByOrdinal = positionByOrdinal;
         _getOrdinal = getOrdinal;
@@ -51,7 +51,7 @@ public class PreparedStatementX implements AutoCloseable {
         return this;
     }
 
-    private void setValue(Object val, Table.ColInfo col, int position) throws SQLException {
+    private void setValue(Object val, ColumnInfo col, int position) throws SQLException {
         if (0 > position) {
             throw new SQLException("Invalid position: " + position);
         }
@@ -78,7 +78,7 @@ public class PreparedStatementX implements AutoCloseable {
     private final String _stmt;
     public final Integer[] _positionByOrdinal;
     private final Function<Object, Integer> _getOrdinal;
-    private final Table.ColInfo[] _colInfo;
+    private final ColumnInfo[] _colInfo;
     private PreparedStatement _pstmt = null;
     public final int numPositions;
 

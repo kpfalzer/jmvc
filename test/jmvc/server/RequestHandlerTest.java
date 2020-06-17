@@ -16,7 +16,7 @@ class RequestHandlerTest {
     static class Handler extends RequestHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            _initialize(exchange);
+            initialize(exchange);
             boolean debug = true;
         }
     }

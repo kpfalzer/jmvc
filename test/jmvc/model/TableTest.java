@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 
-import static gblibx.Util.castobj;
-import static gblibx.Util.downcast;
+import static gblibx.Util.*;
 
 class TableTest {
 
@@ -84,6 +83,8 @@ class TableTest {
                     ;
             QueryResult result = castobj(dbase.query(query));
             int nrows = result.nrows();
+            result = castobj(Teachers.findById(stream(1,2,3), false));
+            result = castobj(Teachers.findById(99, false));
             boolean stop = true;
         }
         /*

@@ -16,18 +16,18 @@ import java.util.concurrent.Executors;
  */
 public class MtHttpServer {
     public MtHttpServer(String host, int port) throws IOException {
-        __server = HttpServer.create(
+        _server = HttpServer.create(
                 new InetSocketAddress(host, port), BACKLOG);
     }
 
     public MtHttpServer start() {
-        __server.setExecutor(Executors.newFixedThreadPool(NTHREADS));
-        __server.start();
+        _server.setExecutor(Executors.newFixedThreadPool(NTHREADS));
+        _server.start();
         return this;
     }
 
     public MtHttpServer stop(int delay) {
-        __server.stop(delay);
+        _server.stop(delay);
         return this;
     }
 
@@ -36,11 +36,11 @@ public class MtHttpServer {
     }
 
     public MtHttpServer addRoute(String path, RequestHandler handler) {
-        __server.createContext(path, handler);
+        _server.createContext(path, handler);
         return this;
     }
 
-    private final HttpServer __server;
+    private final HttpServer _server;
     public static final Integer BACKLOG =
             Integer.parseInt(System.getProperty("httpserver.backlog", "0"));
     public static final Integer NTHREADS =

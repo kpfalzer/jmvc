@@ -15,18 +15,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static gblibx.Util.*;
+import static java.net.HttpURLConnection.HTTP_OK;
 
 public abstract class RequestHandler implements HttpHandler {
-    protected void _initialize(HttpExchange exchange) {
+    protected RequestHandler sendResponse(String response, String xtype) throws IOException {
+        final String type = String.format("application/%s", xtype);
+        final int length = response.length();
+        _exchange.getResponseHeaders().add("Content-type", type);
+        _exchange.getResponseHeaders().add("Content-length", Integer.toString(length));
+        _exchange.sendResponseHeaders(HTTP_OK, length);
+        _exchange.getResponseBody().write(response.getBytes());
+        _exchange.close();
+        return this;
+    }
+
+    public boolean isPOST() {
+        return _reqMethod.equalsIgnoreCase("post");
+    }
+
+    protected void initialize(HttpExchange exchange) {
         _exchange = exchange;
         _reqHeaders = _exchange.getRequestHeaders();
         _reqMethod = _exchange.getRequestMethod();
         _accept = _reqHeaders.getFirst(ACCEPT);
         _contentType = _reqHeaders.getFirst(CONTENT_TYPE);
-        __setURI()._readBody()._bodyAsJSON();
+        setURI().readBody().bodyAsJSON();
     }
 
-    protected RequestHandler _readBody() {
+    protected RequestHandler readBody() {
         _body = null;
         if (!_reqHeaders.containsKey(CONTENT_LENGTH)) return this;
         _bodyType = EBodyType.eUnknown;
@@ -41,24 +57,24 @@ public abstract class RequestHandler implements HttpHandler {
         return this;
     }
 
-    protected boolean _hasUriParams() {
+    protected boolean hasUriParams() {
         return isNonNull(_uriParams);
     }
 
-    protected boolean _hasBody() {
+    protected boolean hasBody() {
         return isNonNull(_body);
     }
 
-    protected Object[] _bodyAsObjAry() {
+    protected Object[] bodyAsObjAry() {
         return (EBodyType.eJsonAry == _bodyType) ? castobj(_bodyObj) : null;
     }
 
-    protected Map<String, Object> _bodyAsObj() {
+    protected Map<String, Object> bodyAsObj() {
         return (EBodyType.eJsonObj == _bodyType) ? castobj(_bodyObj) : null;
     }
 
-    protected RequestHandler _bodyAsJSON() {
-        if (_hasBody()) {
+    protected RequestHandler bodyAsJSON() {
+        if (hasBody()) {
             char c = _body.charAt(0);
             try {
                 if ('[' == c) {
@@ -78,7 +94,7 @@ public abstract class RequestHandler implements HttpHandler {
         return this;
     }
 
-    private RequestHandler __setURI() {
+    private RequestHandler setURI() {
         //todo: how do funny chars appear?
         String uri = _exchange.getRequestURI().toString();
         int p = uri.indexOf('?');
@@ -103,7 +119,7 @@ public abstract class RequestHandler implements HttpHandler {
     public static final String CONTENT_TYPE = "Content-type";
     public static final String CONTENT_LENGTH = "Content-length";
 
-    public static enum EBodyType {
+    public enum EBodyType {
         eNone,
         eUnknown,
         eJsonParseError,

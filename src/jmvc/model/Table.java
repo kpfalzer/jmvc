@@ -3,8 +3,11 @@ package jmvc.model;
 import jmvc.Exception;
 
 import java.util.EnumSet;
+import java.util.Map;
+import java.util.stream.Stream;
 
-import static gblibx.Util.*;
+import static gblibx.Util.castobj;
+import static gblibx.Util.stream;
 
 public abstract class Table<E extends Enum<E>> {
 
@@ -94,6 +97,16 @@ public abstract class Table<E extends Enum<E>> {
      */
     public abstract int insertRow(Object... colVals);
 
+    public int insertRow(Map<String, Object> kvs) {
+        Object colVals[] = new Object[2 * kvs.size()];
+        int i = 0;
+        for (Map.Entry<String,Object> kv : kvs.entrySet()) {
+            colVals[i++] = getEnumOfCol(kv.getKey());
+            colVals[i++] = kv.getValue();
+        }
+        return insertRow(colVals);
+    }
+
     /**
      * Common variety UPDATE TABLE SET col1=val1... WHERE ID=id.
      *
@@ -103,6 +116,26 @@ public abstract class Table<E extends Enum<E>> {
      */
     public abstract int updateTableById(int id, Object... colVals);
 
+    /**
+     * Find rows in table by id.
+     * @param ids one or more id.
+     * @param orderByIdAsc true to order by ID ascending; else order by ID descending.
+     * @return sorted rows.
+     */
+    public abstract Object findById(Stream<Integer> ids, boolean orderByIdAsc);
+
+    public final Object findById(Integer id, boolean orderByIdAsc) {
+        return findById(stream(id), orderByIdAsc);
+    }
+
+    public final Object findById(Stream<Integer> ids) {
+        return findById(ids, true);
+    }
+
+    public final Object findById(Integer id) {
+        return findById(stream(id), true);
+    }
+
     public final String name;
     protected final Enum<E>[] _config;
     protected final EnumSet<E> _configSet;
@@ -111,25 +144,6 @@ public abstract class Table<E extends Enum<E>> {
     /**
      * ColInfo by _config ordinal.
      */
-    protected ColInfo[] _colInfo;
+    protected ColumnInfo[] _colInfo;
 
-    public static class ColInfo {
-        public ColInfo(int type, int size, int position, String defaultVal, boolean isPrimaryKey) {
-            this.type = type;
-            this.size = size;
-            this.position = position;
-            this.defaultVal = defaultVal;
-            this.isPrimaryKey = isPrimaryKey;
-        }
-
-        public boolean hasDefaultVal() {
-            return isNonNull(defaultVal);
-        }
-
-        public final int type;
-        public final int size;
-        public final int position;
-        public final String defaultVal;
-        public final boolean isPrimaryKey;
-    }
 }
