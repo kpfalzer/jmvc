@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import jmvc.Exception;
 import jmvc.Util;
+import jmvc.logging.Requests;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -30,7 +31,7 @@ public abstract class RequestHandler implements HttpHandler {
     }
 
     public boolean isPOST() {
-        return _reqMethod.equalsIgnoreCase("post");
+        return getRequestMethod().equalsIgnoreCase("POST");
     }
 
     protected void initialize(HttpExchange exchange) {
@@ -39,7 +40,28 @@ public abstract class RequestHandler implements HttpHandler {
         _reqMethod = _exchange.getRequestMethod();
         _accept = _reqHeaders.getFirst(ACCEPT);
         _contentType = _reqHeaders.getFirst(CONTENT_TYPE);
+        Requests.logRequest(this);
         setURI().readBody().bodyAsJSON();
+    }
+
+    public String getRemoteAddress() {
+        return _exchange.getRemoteAddress().toString();
+    }
+
+    public String getRequestURI() {
+        return _exchange.getRequestURI().toString();
+    }
+
+    public String getContentType() {
+        return _contentType;
+    }
+
+    public String getRequestMethod() {
+        return _reqMethod;
+    }
+
+    public String getAccept() {
+        return _accept;
     }
 
     protected RequestHandler readBody() {

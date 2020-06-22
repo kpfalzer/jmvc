@@ -42,7 +42,7 @@ public class MtHttpServer {
 
     private final HttpServer _server;
     public static final Integer BACKLOG =
-            Integer.parseInt(System.getProperty("httpserver.backlog", "0"));
+            Integer.parseInt(System.getProperty("server.MtHttpServer.BACKLOG", "0"));
     public static final Integer NTHREADS =
-            Integer.parseInt(System.getProperty("httpserver.nthreads", "16"));
+            Integer.parseInt(System.getProperty("server.MtHttpServer.NTHREADS", "16"));
 }
