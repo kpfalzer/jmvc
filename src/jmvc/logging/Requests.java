@@ -21,6 +21,7 @@ public class Requests {
         String fullMsg = Messages.formatnc(
                 Logger.ELevel.eInfo,
                 "REQ-1",
+                request.getID(),
                 request.getRemoteAddress(),
                 request.getRequestMethod(),
                 request.getRequestURI(),

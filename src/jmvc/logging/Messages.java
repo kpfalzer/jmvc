@@ -90,7 +90,7 @@ public class Messages {
 
     // pairs of code, message
     private static final String[] _MESSAGES = new String[]{
-            "REQ-1", "%s %s %s %s",
+            "REQ-1", "%d %s %s %s %s",
             _UNKNOWN, "Unknown code: %s.  Arguments: %s"
     };
 

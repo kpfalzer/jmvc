@@ -7,7 +7,7 @@ import java.io.IOException;
 
 /**
  * Test POST request:
- * curl --header "Content-Type: application/json" --request POST --data '{"username":"xyz","password":"xyz","ar1":[1,2,3]}' http://localhost:3005/abc
+ * curl --header "Content-Type: application/json" --request POST --data '{"name":"mr. crazy-k"}' http://localhost:3005/teachers/create
  */
 class RequestHandlerTest {
 

@@ -35,6 +35,9 @@ public abstract class RequestHandler implements HttpHandler {
     }
 
     protected void initialize(HttpExchange exchange) {
+        synchronized (this) {
+            _rhid = ++_RHID;
+        };
         _exchange = exchange;
         _reqHeaders = _exchange.getRequestHeaders();
         _reqMethod = _exchange.getRequestMethod();
@@ -42,6 +45,10 @@ public abstract class RequestHandler implements HttpHandler {
         _contentType = _reqHeaders.getFirst(CONTENT_TYPE);
         Requests.logRequest(this);
         setURI().readBody().bodyAsJSON();
+    }
+
+    public long getID() {
+        return _rhid;
     }
 
     public String getRemoteAddress() {
@@ -159,6 +166,10 @@ public abstract class RequestHandler implements HttpHandler {
     protected Object _bodyObj;
     protected Exception _exception;
     protected Map<String, String> _uriParams = null;
+    protected long _rhid;
+
+    // unique ID for every handler instance.
+    private static long _RHID = 0;
 
     protected RequestHandler() {
         //do nothing
