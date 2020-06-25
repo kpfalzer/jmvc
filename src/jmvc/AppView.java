@@ -1,4 +1,6 @@
 package jmvc;
 
-public class AppView {
+public abstract class AppView {
+    protected AppView() {
+    }
 }

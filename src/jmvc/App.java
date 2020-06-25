@@ -10,7 +10,7 @@ import static gblibx.Util.isNonNull;
 /**
  * Base of our JMVC application.
  */
-public class App {
+public abstract class App {
     protected App(String host, int port) throws IOException {
         if (isNonNull(_theOne)) {
             throw new Exception.TODO("App is singleton");

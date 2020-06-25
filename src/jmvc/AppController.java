@@ -13,7 +13,7 @@ import static gblibx.Util.toMap;
 /**
  * Base of all controllers.
  */
-public class AppController<E extends Enum<E>> {
+public abstract class AppController<E extends Enum<E>> {
     protected AppController(Table<E> model, boolean addDefaultCreate) {
         _model = model;
         if (addDefaultCreate) {
@@ -49,7 +49,7 @@ public class AppController<E extends Enum<E>> {
             }
             final Map<String, Object> kvs = bodyAsObj();
             Integer id = _model.insertRow(kvs);
-            sendResponse(createResponse(id), "json");
+            sendResponse(createResponse(id), "application/json");
         }
     };
 }

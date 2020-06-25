@@ -1,4 +1,5 @@
 package jmvc;
 
-public class AppModel {
+public abstract class AppModel {
+    protected AppModel() {}
 }

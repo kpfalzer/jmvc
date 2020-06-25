@@ -4,6 +4,7 @@ import jmvc.model.Database;
 import jmvc.model.Table;
 import jmvc.model.sql.SqlDatabase;
 import jmvc.model.sql.SqlTable;
+import jmvc.server.StaticPageHandler;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -87,6 +88,7 @@ class AppTest {
         try {
             //Must create App before anything else.
             final MyApp MyApp = new MyApp("localhost", 3005);
+            StaticPageHandler.addDefault();
             final TeacherController TeacherController = new TeacherController(Teachers);
             MyApp.start();
         } catch (IOException | InterruptedException e) {

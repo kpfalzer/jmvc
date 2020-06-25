@@ -19,13 +19,33 @@ import static gblibx.Util.*;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 public abstract class RequestHandler implements HttpHandler {
-    protected RequestHandler sendResponse(String response, String xtype) throws IOException {
-        final String type = String.format("application/%s", xtype);
-        final int length = response.length();
+    public static final String TEXT_HTML = "text/html";
+    public static final String TEXT_CSS = "text/css";
+    public static final String TEXT_JS = "text/javascript";
+    public static final String RAW_TYPE = "*/*";
+
+    protected RequestHandler sendResponse(byte[] response, String type) throws IOException {
+        return sendResponse(HTTP_OK, response, type);
+    }
+
+    protected RequestHandler sendResponse(String response, String type) throws IOException {
+        return sendResponse(HTTP_OK, response, type);
+    }
+
+    protected RequestHandler sendBadResponse(int rcode) throws IOException {
+        return sendResponse(rcode, "", TEXT_HTML);
+    }
+
+    protected RequestHandler sendResponse(int rcode, String response, String type) throws IOException {
+        return sendResponse(rcode, response.getBytes(), type);
+    }
+
+    protected RequestHandler sendResponse(int rcode, byte[] response, String type) throws IOException {
+        final int length = response.length;
         _exchange.getResponseHeaders().add("Content-type", type);
         _exchange.getResponseHeaders().add("Content-length", Integer.toString(length));
-        _exchange.sendResponseHeaders(HTTP_OK, length);
-        _exchange.getResponseBody().write(response.getBytes());
+        _exchange.sendResponseHeaders(rcode, length);
+        _exchange.getResponseBody().write(response);
         _exchange.close();
         return this;
     }
@@ -69,6 +89,14 @@ public abstract class RequestHandler implements HttpHandler {
 
     public String getAccept() {
         return _accept;
+    }
+
+    public String getResponseType() {
+        if (getRequestURI().toLowerCase().endsWith(".js")) return TEXT_JS;
+        final String weAccept = getAccept().toLowerCase();
+        if (weAccept.contains("/html")) return TEXT_HTML;
+        if (weAccept.contains("/css")) return TEXT_CSS;
+        return RAW_TYPE;
     }
 
     protected RequestHandler readBody() {
