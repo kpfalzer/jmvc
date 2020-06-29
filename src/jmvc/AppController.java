@@ -22,11 +22,55 @@ public abstract class AppController<E extends Enum<E>> {
     }
 
     /**
-     * Add route for /table/create (POST)
+     * Add a view (handler) for designated route.
+     *
+     * @param path REST route: typically /table/verb...
+     * @param view  view handler.
+     * @return this controller instance.
+     */
+    protected AppController addRoute(String path, AppView view) {
+        //Handler is lightweight delegate, so we do not instance
+        //heavy RequestHandler for every controller instance.
+        App.addRoute(path, new Handler.Delegate(view));
+        return this;
+    }
+
+    /**
+     * Handler to delegate between router and view.
+     */
+    private static class Handler extends RequestHandler {
+        private Handler(AppView view) {
+            _view = view;
+        }
+
+        private final AppView _view;
+
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            initialize(exchange);
+            //todo
+        }
+
+        private static class Delegate extends RequestHandler.Delegate {
+            private Delegate(AppView view) {
+                _view = view;
+            }
+
+            private final AppView _view;
+
+            @Override
+            public RequestHandler create() {
+                return new Handler(_view);
+            }
+        }
+    }
+
+    /**
+     * Add route for /table/create (POST+json)
      */
     private void addDefaultCreate() {
         final String path = String.format("/%s/%s", _model.name.toLowerCase(), CREATE);
-        App.addRoute(path, _createHandler);
+        App.addRoute(path, createHandler);
     }
 
     protected final Table<E> _model;
@@ -38,12 +82,12 @@ public abstract class AppController<E extends Enum<E>> {
         return jsobj.toString();
     }
 
-    private final RequestHandler _createHandler = new RequestHandler() {
+    private final RequestHandler createHandler = new RequestHandler() {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             initialize(exchange);
             boolean isValid = isPOST() && (_bodyType == EBodyType.eJsonObj);
-            if (! isValid) {
+            if (!isValid) {
                 //TODO: need to respond
                 throw new Exception.TODO("Expected POST and eJsonObj");
             }

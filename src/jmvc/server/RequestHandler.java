@@ -202,4 +202,22 @@ public abstract class RequestHandler implements HttpHandler {
     protected RequestHandler() {
         //do nothing
     }
+
+    /**
+     * A lightweight wrapper around handler such that we do not create full-blown
+     * instances of RequestHandler for every controller instance.
+     * Instead, we create the handler on the fly when route/handler invoked.
+     */
+    public static abstract class Delegate extends RequestHandler {
+        /**
+         * Create instance of actual handler.
+         * @return instance of RequestHandler.
+         */
+        public abstract RequestHandler create();
+
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            create().handle(exchange);
+        }
+    }
 }
