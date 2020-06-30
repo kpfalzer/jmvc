@@ -21,7 +21,8 @@ public abstract class Database {
         Database dbase = null;
         switch (type) {
             case "derby":   //fall through
-            case "mariadb":
+            case "mariadb": //fall through
+            case "mysql":
                 dbase = new SqlDatabase(config);
                 break;
             default:

@@ -68,21 +68,17 @@ public abstract class AppController<E extends Enum<E>> {
     /**
      * Add route for /table/create (POST+json)
      */
-    private void addDefaultCreate() {
+    protected void addDefaultCreate() {
+        // TODO: each Controller instance could have this heavyweight(?) object.
+        // TODO: we could use Handler.Delegate like as above?
+        _createHandler = new CreateHandler();
         final String path = String.format("/%s/%s", _model.name.toLowerCase(), CREATE);
-        App.addRoute(path, createHandler);
+        App.addRoute(path, _createHandler);
     }
 
-    protected final Table<E> _model;
-    public static final String CREATE = "create";
+    protected class CreateHandler extends RequestHandler {
+        protected CreateHandler() {}
 
-    private String createResponse(Integer id) {
-        final Map<String, Object> rmap = toMap("status", 0, "result", id);
-        final JSONObject jsobj = new JSONObject(rmap);
-        return jsobj.toString();
-    }
-
-    private final RequestHandler createHandler = new RequestHandler() {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             initialize(exchange);
@@ -95,5 +91,16 @@ public abstract class AppController<E extends Enum<E>> {
             Integer id = _model.insertRow(kvs);
             sendResponse(createResponse(id), "application/json");
         }
-    };
+    }
+
+    protected final Table<E> _model;
+    public static final String CREATE = "create";
+
+    protected static String createResponse(Integer id) {
+        final Map<String, Object> rmap = toMap("status", 0, "result", id);
+        final JSONObject jsobj = new JSONObject(rmap);
+        return jsobj.toString();
+    }
+
+    private RequestHandler _createHandler = null;
 }
