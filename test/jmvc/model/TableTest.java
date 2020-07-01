@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 
-import static gblibx.Util.*;
+import static gblibx.Util.castobj;
+import static gblibx.Util.downcast;
+import static gblibx.Util.stream;
 
 class TableTest {
 

@@ -67,10 +67,10 @@ public abstract class Database {
         return config.add(URL, url).add(NAME, name).add(USER, user).add(PASSWORD, password);
     }
 
-    private static final Pattern __PATTERN = Pattern.compile("jdbc:([^:]+):.+");
+    private static final Pattern _PATTERN = Pattern.compile("jdbc:([^:]+):.+");
 
     private static String getDbaseType(String url) {
-        final Matcher matcher = __PATTERN.matcher(url);
+        final Matcher matcher = _PATTERN.matcher(url);
         invariant(matcher.matches());
         return matcher.group(1);
     }

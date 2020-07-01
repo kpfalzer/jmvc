@@ -4,9 +4,15 @@ import jmvc.Config;
 import jmvc.Exception;
 import jmvc.model.Database;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-import static gblibx.Util.*;
+import static gblibx.Util.downcast;
+import static gblibx.Util.isNonNull;
+import static gblibx.Util.upcase;
 
 public class SqlDatabase extends Database {
     public SqlDatabase(Config config) {

@@ -6,13 +6,29 @@ import jmvc.model.ColumnInfo;
 import jmvc.model.Database;
 import jmvc.model.Table;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static gblibx.Util.*;
+import static gblibx.Util.append;
+import static gblibx.Util.arrayFill;
+import static gblibx.Util.castobj;
+import static gblibx.Util.isNonNull;
+import static gblibx.Util.join;
+import static gblibx.Util.upcase;
 import static java.util.Objects.isNull;
 
 public class SqlTable<E extends Enum<E>> extends Table {

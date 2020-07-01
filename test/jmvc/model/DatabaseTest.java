@@ -5,17 +5,13 @@ import jmvc.model.sql.SqlDatabase;
 import jmvc.model.sql.SqlTable;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static gblibx.Encryptor.decrypt;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DatabaseTest {
@@ -43,14 +39,15 @@ class DatabaseTest {
         }
     }
 
+    //mysql> show create table jenkins ;
     static enum EJenkins implements Table.ColSpec {
         id("? bigint(20) NOT NULL AUTO_INCREMENT; PRIMARY KEY (?)"),
-        run_id("? bigint(20) DEFAULT NULL"),
+        run_id("? bigint(20) DEFAULT NULL"
+                + "; KEY index_jenkins_on_run_id (?)"
+                + "; CONSTRAINT fk_rails_e89e8ed338 FOREIGN KEY (?) REFERENCES runs (id)"
+        ),
         url("? text"),
-        building("? tinyint(1) DEFAULT '1'")
-        //KEY `index_jenkins_on_run_id` (`run_id`),
-        //CONSTRAINT `fk_rails_e89e8ed338` FOREIGN KEY (`run_id`) REFERENCES `runs` (`id`);
-        ;
+        building("? tinyint(1) DEFAULT '1'");
 
         EJenkins(String spec) {
             _spec = spec;
@@ -64,43 +61,12 @@ class DatabaseTest {
         }
     }
 
-    @Test
-    void connect() throws SQLException {
-        try {
-            final String KEY = "GT%^YHJU&*IK!@#$";
-            byte[] keyBytes= new String("qwerty12345").getBytes();
-            SecretKeySpec key = new SecretKeySpec(keyBytes, "DES");
-            Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
-            SecureRandom randomSecureRandom = SecureRandom.getInstance("SHA1PRNG");
-            byte[] iv = new byte[cipher.getBlockSize()];
-            randomSecureRandom.nextBytes(iv);
-            IvParameterSpec ivSpec = new IvParameterSpec(iv);
-            final String _input = "the quick brown fox jumps over the lazy dog";
-            final byte[] input = _input.getBytes();
-            //encrypt
-            cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
-            byte[] encrypted= new byte[cipher.getOutputSize(input.length)];
-            int enc_len = cipher.update(input, 0, input.length, encrypted, 0);
-            enc_len += cipher.doFinal(encrypted, enc_len);
-            //
-            //descrypt
-            boolean stop = true;
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (ShortBufferException e) {
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        }
+    private static String dk(String ek) throws IOException {
+        return decrypt(new File("/Users/kpfalzer/.gblibx.cryptokey"), ek);
+    }
 
+    @Test
+    void connect() throws SQLException, IOException {
         //"jdbc:derby://localhost:3308/MyDbTest", "MyDbTestUser", "MyDbTestPasswd"
         if (false) {
             final Config config = Database.getConfig(
@@ -130,8 +96,8 @@ class DatabaseTest {
             final Config config = Database.getConfig(
                     "jdbc:mysql://localhost:3306/dvwebdb",
                     "dvwebdb",
-                    "dvwebdbuser",
-                    "dvwebdbpwd"
+                    dk("8Fh85xoqgEbOgBJwKiytPw=="),
+                    dk("dmJMFnHW1ubSJml1QNpeAw==")
             );
             //mitigate issue:
             //java.sql.SQLException: The server time zone value 'PDT' is unrecognized or represents more than one time zone. You must configure either the server or JDBC driver (via the 'serverTimezone' configuration property) to use a more specifc time zone value if you want to utilize time zone support.
@@ -161,6 +127,11 @@ class DatabaseTest {
                     dbase,
                     "runs",
                     DatabaseTest.ERuns.class //values()
+            );
+            final Table<DatabaseTest.ERuns> Jenkins = SqlTable.create(
+                    dbase,
+                    "jenkins",
+                    DatabaseTest.EJenkins.class //values()
             );
             boolean debug = true;
         }
