@@ -33,8 +33,11 @@ import static java.util.Objects.isNull;
 
 public class SqlTable<E extends Enum<E>> extends Table {
 
-    public static <E extends Enum<E>> SqlTable create(Database dbase, String name, Class<E> cols) {
-        return new SqlTable(name, cols, dbase);
+    public static <E extends Enum<E>> SqlTable
+    create(Database dbase, String name, Class<E> cols, String... colIndex) {
+        SqlTable tbl = new SqlTable(name, cols, dbase);
+        tbl.createIndex(colIndex);
+        return tbl;
     }
 
     private SqlTable(String name, Class<E> cols, Database dbase) {
@@ -165,6 +168,15 @@ public class SqlTable<E extends Enum<E>> extends Table {
         }
     }
 
+    @Override
+    public void createIndex(String... cols) {
+        for (String col : cols) {
+            String xstmt = String.format("CREATE INDEX %s_IX_ON_%s ON %s(%s)",
+                    col, name, name, col);
+            dbase().executeStatementNoResult(xstmt.toString());
+        }
+    }
+
     private InsertRow _insertRow = null;
 
     @Override
@@ -190,12 +202,12 @@ public class SqlTable<E extends Enum<E>> extends Table {
 
     @Override
     public Object findById(Stream ids, boolean orderByIdAsc) {
-        String csv = ((Stream<Integer>)ids)
+        String csv = ((Stream<Integer>) ids)
                 .map(e -> e.toString())
                 .collect(Collectors.joining(","));
         String query = String.format(
-          "SELECT * FROM %s WHERE ID in (%s) ORDER BY ID %s",
-          name, csv, ((orderByIdAsc) ? "ASC" : "DESC")
+                "SELECT * FROM %s WHERE ID in (%s) ORDER BY ID %s",
+                name, csv, ((orderByIdAsc) ? "ASC" : "DESC")
         );
         return dbase().query(query);
     }

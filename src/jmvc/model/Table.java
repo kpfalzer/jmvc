@@ -108,6 +108,12 @@ public abstract class Table<E extends Enum<E>> {
     }
 
     /**
+     * CREATE INDEX on designated columns.
+     * @param cols column names.
+     */
+    public abstract void createIndex(String... cols);
+
+    /**
      * Common variety UPDATE TABLE SET col1=val1... WHERE ID=id.
      *
      * @param id      ID value.

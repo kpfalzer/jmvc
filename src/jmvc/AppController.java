@@ -14,6 +14,10 @@ import static gblibx.Util.toMap;
  * Base of all controllers.
  */
 public abstract class AppController<E extends Enum<E>> {
+    protected AppController(Table<E> model) {
+        this(model, true);
+    }
+
     protected AppController(Table<E> model, boolean addDefaultCreate) {
         _model = model;
         if (addDefaultCreate) {
