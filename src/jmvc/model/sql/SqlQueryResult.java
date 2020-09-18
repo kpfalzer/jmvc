@@ -1,26 +1,24 @@
 package jmvc.model.sql;
 
 import jmvc.Exception;
+import jmvc.model.QueryResult;
 
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
 
-import static gblibx.Util.isNonNull;
-import static java.util.Objects.isNull;
-
-public class QueryResult implements AutoCloseable {
-    public QueryResult(SqlDatabase dbase, String sqlQuery) {
+public class SqlQueryResult extends QueryResult implements AutoCloseable {
+    public SqlQueryResult(SqlDatabase dbase, String sqlQuery) {
         _dbase = dbase;
         _sqlQuery = sqlQuery;
     }
 
-    public static QueryResult executeQuery(SqlDatabase dbase, String sqlQuery) {
-        final QueryResult qr = new QueryResult(dbase, sqlQuery);
+    public static SqlQueryResult executeQuery(SqlDatabase dbase, String sqlQuery) {
+        final SqlQueryResult qr = new SqlQueryResult(dbase, sqlQuery);
         return qr.executeQuery();
     }
 
-    public QueryResult executeQuery() {
+    public SqlQueryResult executeQuery() {
         _conn = _dbase.getConnection();
         try {
             _stmt = _conn.createStatement();
@@ -39,37 +37,18 @@ public class QueryResult implements AutoCloseable {
         return this;
     }
 
-    public SQLException exception() {
-        return _exception;
-    }
-
-    public boolean hasException() {
-        return isNonNull(exception());
-    }
-
-    public boolean isValid() {
-        return !(hasException() || isNull(_rows));
-    }
-
-    public int nrows() {
-        return (isValid()) ? _rows.length : 0;
-    }
-
     private final SqlDatabase _dbase;
     private final String _sqlQuery;
     private ResultSet _rs;
     private Connection _conn;
     private Statement _stmt;
-    private SQLException _exception;
-    private ColInfo[] _colInfos;
-    private Object[][] _rows;
 
     @Override
     public void close() {
         _dbase.sclose(_conn, _stmt, _rs);
     }
 
-    private QueryResult updateColInfo() throws SQLException {
+    private SqlQueryResult updateColInfo() throws SQLException {
         final ResultSetMetaData rsmd = _rs.getMetaData();
         final int ncols = rsmd.getColumnCount();
         _colInfos = new ColInfo[ncols];
@@ -82,7 +61,7 @@ public class QueryResult implements AutoCloseable {
         return this;
     }
 
-    private QueryResult collectRows() throws SQLException {
+    private SqlQueryResult collectRows() throws SQLException {
         List<Object[]> rows = new LinkedList<>();
         while (_rs.next()) {
             Object[] row = new Object[_colInfos.length];
@@ -95,14 +74,4 @@ public class QueryResult implements AutoCloseable {
         return this;
     }
 
-    public static class ColInfo {
-        public ColInfo(String tableName, String colName, int colType) {
-            this.colName = colName;
-            this.colType = colType;
-            this.tableName = tableName;
-        }
-
-        public final String colName, tableName;
-        public final int colType;
-    }
 }

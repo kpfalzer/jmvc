@@ -38,7 +38,7 @@ public class SqlDatabase extends Database {
 
     @Override
     public Object query(String statement) {
-        return QueryResult.executeQuery(this, statement);
+        return SqlQueryResult.executeQuery(this, statement);
     }
 
     public void close(Connection conn) {

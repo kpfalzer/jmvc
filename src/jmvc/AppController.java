@@ -3,12 +3,12 @@ package jmvc;
 import com.sun.net.httpserver.HttpExchange;
 import jmvc.model.Table;
 import jmvc.server.RequestHandler;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Consumer;
 
-import static gblibx.Util.toMap;
+import static jmvc.AppView.Helper.JSON.createResponse;
 
 /**
  * Base of all controllers.
@@ -35,15 +35,32 @@ public abstract class AppController<E extends Enum<E>> {
     protected AppController addRoute(String path, AppView view) {
         //Handler is lightweight delegate, so we do not instance
         //heavy RequestHandler for every controller instance.
-        App.addRoute(path, new Handler.Delegate(view));
+        App.addRoute(path, new ViewHandler.Delegate(view));
+        return this;
+    }
+
+    /**
+     * View handler using lambda.
+     *
+     * @param path REST route.
+     * @param xhandler view handler.
+     * @return this controller instance.
+     */
+    protected AppController addRoute(String path, Consumer<ViewHandler> xhandler) {
+        addRoute(path, new AppView() {
+            @Override
+            public void handle(ViewHandler handler) {
+                xhandler.accept(handler);
+            }
+        });
         return this;
     }
 
     /**
      * Handler to delegate between router and view.
      */
-    private static class Handler extends RequestHandler {
-        private Handler(AppView view) {
+    public static class ViewHandler extends RequestHandler {
+        private ViewHandler(AppView view) {
             _view = view;
         }
 
@@ -52,7 +69,7 @@ public abstract class AppController<E extends Enum<E>> {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             initialize(exchange);
-            //todo
+            _view.handle(this);
         }
 
         private static class Delegate extends RequestHandler.Delegate {
@@ -64,7 +81,7 @@ public abstract class AppController<E extends Enum<E>> {
 
             @Override
             public RequestHandler create() {
-                return new Handler(_view);
+                return new ViewHandler(_view);
             }
         }
     }
@@ -99,12 +116,6 @@ public abstract class AppController<E extends Enum<E>> {
 
     protected final Table<E> _model;
     public static final String CREATE = "create";
-
-    protected static String createResponse(Integer id) {
-        final Map<String, Object> rmap = toMap("status", 0, "result", id);
-        final JSONObject jsobj = new JSONObject(rmap);
-        return jsobj.toString();
-    }
 
     private RequestHandler _createHandler = null;
 }

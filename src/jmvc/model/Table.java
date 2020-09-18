@@ -97,6 +97,13 @@ public abstract class Table<E extends Enum<E>> {
      */
     public abstract int insertRow(Object... colVals);
 
+    /**
+     * Select columns from Table.
+     * @param cols columns to select.
+     * @return Select object.
+     */
+    public abstract Select select(String... cols);
+
     public int insertRow(Map<String, Object> kvs) {
         Object colVals[] = new Object[2 * kvs.size()];
         int i = 0;
@@ -141,6 +148,8 @@ public abstract class Table<E extends Enum<E>> {
     public final Object findById(Integer id) {
         return findById(stream(id), true);
     }
+
+    public abstract QueryResult executeQuery(String statement);
 
     public final String name;
     protected final Enum<E>[] _config;

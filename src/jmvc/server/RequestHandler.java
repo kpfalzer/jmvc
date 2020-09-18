@@ -24,23 +24,23 @@ public abstract class RequestHandler implements HttpHandler {
     public static final String TEXT_JS = "text/javascript";
     public static final String RAW_TYPE = "*/*";
 
-    protected RequestHandler sendResponse(byte[] response, String type) throws IOException {
+    public RequestHandler sendResponse(byte[] response, String type) throws IOException {
         return sendResponse(HTTP_OK, response, type);
     }
 
-    protected RequestHandler sendResponse(String response, String type) throws IOException {
+    public RequestHandler sendResponse(String response, String type) throws IOException {
         return sendResponse(HTTP_OK, response, type);
     }
 
-    protected RequestHandler sendBadResponse(int rcode) throws IOException {
+    public RequestHandler sendBadResponse(int rcode) throws IOException {
         return sendResponse(rcode, "", TEXT_HTML);
     }
 
-    protected RequestHandler sendResponse(int rcode, String response, String type) throws IOException {
+    public RequestHandler sendResponse(int rcode, String response, String type) throws IOException {
         return sendResponse(rcode, response.getBytes(), type);
     }
 
-    protected RequestHandler sendResponse(int rcode, byte[] response, String type) throws IOException {
+    public RequestHandler sendResponse(int rcode, byte[] response, String type) throws IOException {
         final int length = response.length;
         _exchange.getResponseHeaders().add("Content-type", type);
         _exchange.getResponseHeaders().add("Content-length", Integer.toString(length));
@@ -99,7 +99,7 @@ public abstract class RequestHandler implements HttpHandler {
         return RAW_TYPE;
     }
 
-    protected RequestHandler readBody() {
+    public RequestHandler readBody() {
         _body = null;
         if (!_reqHeaders.containsKey(CONTENT_LENGTH)) return this;
         _bodyType = EBodyType.eUnknown;
@@ -114,23 +114,23 @@ public abstract class RequestHandler implements HttpHandler {
         return this;
     }
 
-    protected boolean hasUriParams() {
+    public boolean hasUriParams() {
         return isNonNull(_uriParams);
     }
 
-    protected boolean hasBody() {
+    public boolean hasBody() {
         return isNonNull(_body);
     }
 
-    protected Object[] bodyAsObjAry() {
+    public Object[] bodyAsObjAry() {
         return (EBodyType.eJsonAry == _bodyType) ? castobj(_bodyObj) : null;
     }
 
-    protected Map<String, Object> bodyAsObj() {
+    public Map<String, Object> bodyAsObj() {
         return (EBodyType.eJsonObj == _bodyType) ? castobj(_bodyObj) : null;
     }
 
-    protected RequestHandler bodyAsJSON() {
+    public RequestHandler bodyAsJSON() {
         if (hasBody()) {
             char c = _body.charAt(0);
             try {

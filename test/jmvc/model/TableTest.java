@@ -1,7 +1,7 @@
 package jmvc.model;
 
 import jmvc.Config;
-import jmvc.model.sql.QueryResult;
+import jmvc.model.sql.SqlQueryResult;
 import jmvc.model.sql.SqlDatabase;
 import jmvc.model.sql.SqlTable;
 import org.junit.jupiter.api.Test;
@@ -83,7 +83,7 @@ class TableTest {
                             " INNER JOIN TEACHERS" +
                             " ON TEACHER_ID = TEACHERS.ID"
                     ;
-            QueryResult result = castobj(dbase.query(query));
+            SqlQueryResult result = castobj(dbase.query(query));
             int nrows = result.nrows();
             result = castobj(Teachers.findById(stream(1,2,3), false));
             result = castobj(Teachers.findById(99, false));

@@ -2,16 +2,9 @@ package jmvc.model.sql;
 
 import gblibx.Util;
 import jmvc.Exception;
-import jmvc.model.ColumnInfo;
-import jmvc.model.Database;
-import jmvc.model.Table;
+import jmvc.model.*;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -169,6 +162,11 @@ public class SqlTable<E extends Enum<E>> extends Table {
     }
 
     @Override
+    public Select select(String... cols) {
+        return new SqlSelect(this, cols);
+    }
+
+    @Override
     public void createIndex(String... cols) {
         for (String col : cols) {
             String xstmt = String.format("CREATE INDEX %s_IX_ON_%s ON %s(%s)",
@@ -198,6 +196,11 @@ public class SqlTable<E extends Enum<E>> extends Table {
             //TODO: log message;
             return -1;
         }
+    }
+
+    @Override
+    public QueryResult executeQuery(String statement) {
+        return SqlQueryResult.executeQuery(dbase(), statement);
     }
 
     @Override
@@ -234,16 +237,16 @@ public class SqlTable<E extends Enum<E>> extends Table {
         }
 
         private int execute(Object... colVals) throws SQLException {
-            if ((2 * __pstmt.numPositions) != colVals.length) {
+            if ((2 * _pstmt.numPositions) != colVals.length) {
                 throw new Exception.TODO("Invalid # of values");
             }
             final Connection conn = connection();
-            PreparedStatement pstmt = (__hasID)
-                    ? __pstmt.getPreparedStatement(conn, Statement.RETURN_GENERATED_KEYS, colVals)
-                    : __pstmt.getPreparedStatement(conn, colVals);
+            PreparedStatement pstmt = (_hasID)
+                    ? _pstmt.getPreparedStatement(conn, Statement.RETURN_GENERATED_KEYS, colVals)
+                    : _pstmt.getPreparedStatement(conn, colVals);
             executeUpdate(pstmt);
-            final int id = (__hasID) ? getResultId(pstmt) : -1;
-            __pstmt.close();
+            final int id = (_hasID) ? getResultId(pstmt) : -1;
+            _pstmt.close();
             return id;
         }
 
@@ -254,10 +257,10 @@ public class SqlTable<E extends Enum<E>> extends Table {
                 final int ordinal = col.ordinal();
                 if (!_colInfo[ordinal].hasDefaultVal()) {
                     colNames.add(col.name().toUpperCase());
-                    positionByOrdinal[ordinal] = ++__numPositions;
+                    positionByOrdinal[ordinal] = ++_numPositions;
                 } else {
                     positionByOrdinal[ordinal] = -1;
-                    __hasID |= col.name().equalsIgnoreCase("ID");
+                    _hasID |= col.name().equalsIgnoreCase("ID");
                 }
             }
             StringBuilder stmt = new StringBuilder();
@@ -271,12 +274,12 @@ public class SqlTable<E extends Enum<E>> extends Table {
                     .append(join(arrayFill(new String[colNames.size()], "?"), ","))
                     .append(')')
             ;
-            __pstmt = new PreparedStatementX(stmt.toString(), positionByOrdinal, getOrdinal, _colInfo);
+            _pstmt = new PreparedStatementX(stmt.toString(), positionByOrdinal, getOrdinal, _colInfo);
         }
 
-        private PreparedStatementX __pstmt;
-        private int __numPositions = 0;
-        private boolean __hasID = false;
+        private PreparedStatementX _pstmt;
+        private int _numPositions = 0;
+        private boolean _hasID = false;
     }
 
     private static int getResultId(PreparedStatement pstmt) throws SQLException {
@@ -340,7 +343,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
                 cols.add(castobj(colVals[i]));
             }
             EnumSet<E> key = EnumSet.copyOf(cols);
-            if (!__pstmtByCol.containsKey(key)) {
+            if (!_pstmtByCol.containsKey(key)) {
                 Integer[] positionByOrdinal = arrayFill(new Integer[_config.length], -1);
                 int currPos = 0;
                 StringBuilder stmt = new StringBuilder();
@@ -364,11 +367,11 @@ public class SqlTable<E extends Enum<E>> extends Table {
                 }
                 stmt.append(" WHERE ID=?");
                 positionByOrdinal[getColInfoOrdinal("ID")] = ++currPos;
-                __pstmtByCol.put(key, new PreparedStatementX(stmt.toString(), positionByOrdinal, getOrdinal, _colInfo));
+                _pstmtByCol.put(key, new PreparedStatementX(stmt.toString(), positionByOrdinal, getOrdinal, _colInfo));
             }
-            return __pstmtByCol.get(key);
+            return _pstmtByCol.get(key);
         }
 
-        private Map<EnumSet<E>, PreparedStatementX> __pstmtByCol = new HashMap<>();
+        private Map<EnumSet<E>, PreparedStatementX> _pstmtByCol = new HashMap<>();
     }
 }

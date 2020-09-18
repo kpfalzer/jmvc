@@ -2,10 +2,7 @@ package jmvc.model.sql;
 
 import jmvc.model.ColumnInfo;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -61,6 +58,11 @@ public class PreparedStatementX implements AutoCloseable {
                 break;
             case Types.VARCHAR:
                 _pstmt.setString(position, castobj(val));
+                break;
+            case Types.TIMESTAMP:
+                //v must be form: YYYY-MM-DD HH:MM:SS
+                final String v = castobj(val);
+                _pstmt.setTimestamp(position, Timestamp.valueOf(v));
                 break;
             default:
                 throw new SQLException("Invalid type: " + col.type);
