@@ -33,6 +33,15 @@ public abstract class App {
         Thread.currentThread().join();
     }
 
-    private final MtHttpServer  _server;
+    private final MtHttpServer _server;
     private static App _theOne = null;
+
+    private static final String _APP_ROOT = "app.root";
+
+    /**
+     * Set to root of app.
+     */
+    public static final String APPROOT = System.getProperty(
+            _APP_ROOT,
+            System.getProperty("user.dir"));
 }

@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Objects.isNull;
-import static jmvc.AppView.Helper.JSON.createResponse;
+import static jmvc.view.Json.createResponse;
 
 /**
  * Base of all controllers.

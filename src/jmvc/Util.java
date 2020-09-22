@@ -1,5 +1,7 @@
 package jmvc;
 
+import java.nio.file.Paths;
+
 public class Util {
     public static void TODO(String message) {
         throw new JmvcException.TODO(message);
@@ -12,5 +14,9 @@ public class Util {
     public static void dumpAndDie(Exception ex) {
         ex.printStackTrace(System.err);
         System.exit(1);
+    }
+
+    public static String getViewFileName(String path) {
+        return Paths.get(App.APPROOT, path).toString();
     }
 }
