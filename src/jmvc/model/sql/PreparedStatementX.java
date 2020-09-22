@@ -56,7 +56,8 @@ public class PreparedStatementX implements AutoCloseable {
             case Types.INTEGER:
                 _pstmt.setInt(position, castobj(val));
                 break;
-            case Types.VARCHAR:
+            case Types.VARCHAR: //fall through
+            case Types.CHAR:
                 _pstmt.setString(position, castobj(val));
                 break;
             case Types.TIMESTAMP:

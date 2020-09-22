@@ -1,6 +1,6 @@
 package jmvc.model;
 
-import jmvc.Exception;
+import jmvc.JmvcException;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -68,7 +68,7 @@ public abstract class Table<E extends Enum<E>> {
                 return e.ordinal();
         }
         if (throwOnFail)
-            throw new Exception.TODO("invalid column: " + colName);
+            throw new JmvcException.TODO("invalid column: " + colName);
         else
             return -1;
     }
@@ -103,6 +103,8 @@ public abstract class Table<E extends Enum<E>> {
      * @return Select object.
      */
     public abstract Select select(String... cols);
+
+    public abstract Select selectDistinct(String... cols);
 
     public int insertRow(Map<String, Object> kvs) {
         Object colVals[] = new Object[2 * kvs.size()];

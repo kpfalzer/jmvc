@@ -3,7 +3,7 @@ package jmvc.server;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import jmvc.Exception;
+import jmvc.JmvcException;
 import jmvc.Util;
 import jmvc.logging.Requests;
 import org.json.JSONArray;
@@ -54,10 +54,15 @@ public abstract class RequestHandler implements HttpHandler {
         return getRequestMethod().equalsIgnoreCase("POST");
     }
 
+    public boolean isGET() {
+        return getRequestMethod().equalsIgnoreCase("GET");
+    }
+
     protected void initialize(HttpExchange exchange) {
         synchronized (this) {
             _rhid = ++_RHID;
-        };
+        }
+        ;
         _exchange = exchange;
         _reqHeaders = _exchange.getRequestHeaders();
         _reqMethod = _exchange.getRequestMethod();
@@ -115,7 +120,11 @@ public abstract class RequestHandler implements HttpHandler {
     }
 
     public boolean hasUriParams() {
-        return isNonNull(_uriParams);
+        return isNonNull(getUriParams());
+    }
+
+    public Map<String, String> getUriParams() {
+        return _uriParams;
     }
 
     public boolean hasBody() {
@@ -143,7 +152,7 @@ public abstract class RequestHandler implements HttpHandler {
                 } else {
                     _bodyType = EBodyType.eUnknown;
                 }
-            } catch (Exception ex) {
+            } catch (JmvcException ex) {
                 _exception = ex;
                 _bodyType = EBodyType.eJsonParseError;
             }
@@ -192,7 +201,7 @@ public abstract class RequestHandler implements HttpHandler {
     protected String _body;
     protected EBodyType _bodyType = EBodyType.eNone;
     protected Object _bodyObj;
-    protected Exception _exception;
+    protected JmvcException _exception;
     protected Map<String, String> _uriParams = null;
     protected long _rhid;
 
@@ -211,6 +220,7 @@ public abstract class RequestHandler implements HttpHandler {
     public static abstract class Delegate extends RequestHandler {
         /**
          * Create instance of actual handler.
+         *
          * @return instance of RequestHandler.
          */
         public abstract RequestHandler create();

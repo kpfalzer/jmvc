@@ -1,7 +1,7 @@
 package jmvc.model.sql;
 
 import jmvc.Config;
-import jmvc.Exception;
+import jmvc.JmvcException;
 import jmvc.model.Database;
 
 import java.sql.Connection;
@@ -31,7 +31,7 @@ public class SqlDatabase extends Database {
             xclose(conn);
         }
         if (isNonNull(exception)) {
-            throw new Exception.TODO(exception);
+            throw new JmvcException.TODO(exception);
         }
         return schema;
     }
@@ -143,7 +143,7 @@ public class SqlDatabase extends Database {
             xclose(conn, rs);
         }
         if (isNonNull(exception)) {
-            throw new Exception.TODO(exception);
+            throw new JmvcException.TODO(exception);
         }
         return result;
     }
@@ -157,7 +157,7 @@ public class SqlDatabase extends Database {
             connection.setSchema(SCHEMA);
         } catch (SQLException ex) {
             xclose(connection);
-            throw new Exception.TODO(ex);
+            throw new JmvcException.TODO(ex);
         }
         return connection;
     }
@@ -190,7 +190,7 @@ public class SqlDatabase extends Database {
             xclose(stmt, conn);
         }
         if (isNonNull(exception)) {
-            throw new Exception.TODO(exception);
+            throw new JmvcException.TODO(exception);
         }
         return rset;
     }

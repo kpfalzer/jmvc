@@ -1,7 +1,7 @@
 package jmvc.model.sql;
 
 import gblibx.Util;
-import jmvc.Exception;
+import jmvc.JmvcException;
 import jmvc.model.*;
 
 import java.sql.*;
@@ -76,7 +76,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
             exception = e;
         }
         if (isNonNull(exception)) {
-            throw new Exception.TODO(exception);
+            throw new JmvcException.TODO(exception);
         }
         return dmd;
     }
@@ -108,7 +108,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
             close(rs);
         }
         if (isNonNull(exception)) {
-            throw new Exception.TODO(exception);
+            throw new JmvcException.TODO(exception);
         }
     }
 
@@ -127,7 +127,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
             );
             return new Util.Pair<>(name, info);
         } catch (SQLException e) {
-            throw new Exception.TODO(e);
+            throw new JmvcException.TODO(e);
         }
     }
 
@@ -157,13 +157,18 @@ public class SqlTable<E extends Enum<E>> extends Table {
         } catch (SQLException ex) {
             //TODO: need to deal w/ exception here, since we dont propagate exception
             //through method signature.
-            throw new Exception.TODO(ex);
+            throw new JmvcException.TODO(ex);
         }
     }
 
     @Override
     public Select select(String... cols) {
         return new SqlSelect(this, cols);
+    }
+
+    @Override
+    public Select selectDistinct(String... cols) {
+        return new SqlSelect(this, true, cols);
     }
 
     @Override
@@ -186,7 +191,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
             int rval = _updateTableById.execute(id, colVals);
             // We expect 0, since we cannot return value in MySql
             if (0 != rval) {
-                throw new Exception.TODO("Expected 0");
+                throw new JmvcException.TODO("Expected 0");
             }
             //return same id
             return id;
@@ -224,7 +229,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
     private static void executeUpdate(PreparedStatement pstmt) throws SQLException {
         int rowCnt = pstmt.executeUpdate();
         if (1 != rowCnt) {
-            throw new Exception.TODO("Expected 1 row");
+            throw new JmvcException.TODO("Expected 1 row");
         }
     }
 
@@ -238,7 +243,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
 
         private int execute(Object... colVals) throws SQLException {
             if ((2 * _pstmt.numPositions) != colVals.length) {
-                throw new Exception.TODO("Invalid # of values");
+                throw new JmvcException.TODO("Invalid # of values");
             }
             final Connection conn = connection();
             PreparedStatement pstmt = (_hasID)
@@ -288,7 +293,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
         if (rs.next()) {
             int colCnt = rs.getMetaData().getColumnCount();
             if (1 != colCnt) {
-                throw new Exception.TODO("Unexpected column count: " + colCnt);
+                throw new JmvcException.TODO("Unexpected column count: " + colCnt);
             }
             rval = rs.getInt(1);
             rs.close();
@@ -301,7 +306,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
         public Integer apply(Object o) {
             final E col = castobj(o);
             if (!isValidColumn(col)) {
-                throw new Exception.TODO("Invalid column: " + col.name());
+                throw new JmvcException.TODO("Invalid column: " + col.name());
             }
             return col.ordinal();
         }
@@ -316,7 +321,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
         private UpdateTableById() {
             final int id = getColInfoOrdinal("ID", false);
             if (0 > id) {
-                throw new Exception.TODO("Table does not have ID column");
+                throw new JmvcException.TODO("Table does not have ID column");
             }
         }
 

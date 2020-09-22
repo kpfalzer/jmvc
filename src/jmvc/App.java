@@ -13,7 +13,7 @@ import static gblibx.Util.isNonNull;
 public abstract class App {
     protected App(String host, int port) throws IOException {
         if (isNonNull(_theOne)) {
-            throw new Exception.TODO("App is singleton");
+            throw new JmvcException.TODO("App is singleton");
         }
         _server = new MtHttpServer(host, port);
         _theOne = this;

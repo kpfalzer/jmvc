@@ -1,12 +1,9 @@
 package jmvc.model.sql;
 
 import gblibx.Util;
-import jmvc.model.QueryResult;
 import jmvc.model.Select;
 import jmvc.model.Table;
 import jmvc.model.Where;
-
-import static java.util.Objects.isNull;
 
 /**
  * SELECT from single table.
@@ -16,6 +13,10 @@ public class SqlSelect extends Select {
         super(table, cols);
     }
 
+    public SqlSelect(SqlTable table, boolean distinct, String... cols) {
+        super(table, distinct, cols);
+    }
+
     @Override
     public Where where(String stmt) {
         return new SqlWhere(stmt, this);
@@ -23,15 +24,11 @@ public class SqlSelect extends Select {
 
     @Override
     public String getStatement() {
-        return String.format("SELECT %s FROM %s",
-                isNull(_cols) ? "*" : Util.join(_cols, ","),
+        return String.format("SELECT %s %s FROM %s",
+                _distinct ? "DISTINCT" : "",
+                (0 == _cols.length) ? "*" : Util.join(_cols, ","),
                 getTable().name
         );
-    }
-
-    @Override
-    public QueryResult execute() {
-        return getTable().executeQuery(getStatement());
     }
 
     @Override

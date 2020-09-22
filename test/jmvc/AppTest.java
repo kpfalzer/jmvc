@@ -92,7 +92,7 @@ class AppTest {
             final TeacherController TeacherController = new TeacherController(Teachers);
             MyApp.start();
         } catch (IOException | InterruptedException e) {
-            throw new Exception.TODO(e);
+            throw new JmvcException.TODO(e);
         }
     }
 }

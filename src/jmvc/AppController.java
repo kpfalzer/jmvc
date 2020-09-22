@@ -7,7 +7,9 @@ import jmvc.server.RequestHandler;
 import java.io.IOException;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
+import static java.util.Objects.isNull;
 import static jmvc.AppView.Helper.JSON.createResponse;
 
 /**
@@ -29,7 +31,7 @@ public abstract class AppController<E extends Enum<E>> {
      * Add a view (handler) for designated route.
      *
      * @param path REST route: typically /table/verb...
-     * @param view  view handler.
+     * @param view view handler.
      * @return this controller instance.
      */
     protected AppController addRoute(String path, AppView view) {
@@ -42,7 +44,7 @@ public abstract class AppController<E extends Enum<E>> {
     /**
      * View handler using lambda.
      *
-     * @param path REST route.
+     * @param path     REST route.
      * @param xhandler view handler.
      * @return this controller instance.
      */
@@ -72,6 +74,43 @@ public abstract class AppController<E extends Enum<E>> {
             _view.handle(this);
         }
 
+        public <T> T getUriParamVal(String key, Function<String, T> convert, T defaultVal) {
+            String sval = gblibx.Util.applyIfNotNull(getUriParams(), (m)->m.get(key));
+            return (isNull(sval))
+                    ? defaultVal
+                    : applyConversion(sval, convert, defaultVal);
+        }
+
+        /**
+         * Apply conversion and catch exception to force default.
+         * @param sval lookup value.
+         * @param convert conversion function.
+         * @param defaultVal default value.
+         * @param <T> type of return value.
+         * @return converted sval or defaultVal.
+         */
+        private static <T> T applyConversion(String sval, Function<String, T> convert, T defaultVal) {
+            T rval;
+            try {
+                rval = convert.apply(sval);
+            } catch (Exception e) {
+                rval = defaultVal;
+            }
+            return rval;
+        }
+
+        public Integer getUriParamVal(String key, int defaultVal) {
+            return getUriParamVal(key, (String s) -> {
+                return Integer.parseInt(s);
+            }, defaultVal);
+        }
+
+        public String getUriParamVal(String key, String defaultVal) {
+            return getUriParamVal(key, (String s) -> {
+                return s;
+            }, defaultVal);
+        }
+
         private static class Delegate extends RequestHandler.Delegate {
             private Delegate(AppView view) {
                 _view = view;
@@ -98,19 +137,27 @@ public abstract class AppController<E extends Enum<E>> {
     }
 
     protected class CreateHandler extends RequestHandler {
-        protected CreateHandler() {}
+        protected CreateHandler() {
+        }
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            initialize(exchange);
-            boolean isValid = isPOST() && (_bodyType == EBodyType.eJsonObj);
-            if (!isValid) {
-                //TODO: need to respond
-                throw new Exception.TODO("Expected POST and eJsonObj");
+            try {
+                initialize(exchange);
+                boolean isValid = isPOST() && (_bodyType == EBodyType.eJsonObj);
+                if (!isValid) {
+                    //TODO: need to respond
+                    throw new JmvcException.TODO("Expected POST and eJsonObj");
+                }
+                final Map<String, Object> kvs = bodyAsObj();
+                Integer id = _model.insertRow(kvs);
+                sendResponse(createResponse(id), "application/json");
+            } catch (IOException ex) {
+                JmvcException.printStackTrace(ex);
+                throw ex;
+            } catch (Exception ex) {
+                Util.TODO(ex);
             }
-            final Map<String, Object> kvs = bodyAsObj();
-            Integer id = _model.insertRow(kvs);
-            sendResponse(createResponse(id), "application/json");
         }
     }
 

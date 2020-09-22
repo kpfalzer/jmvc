@@ -1,6 +1,6 @@
 package jmvc.model.sql;
 
-import jmvc.Exception;
+import jmvc.JmvcException;
 import jmvc.model.QueryResult;
 
 import java.sql.*;
@@ -32,7 +32,7 @@ public class SqlQueryResult extends QueryResult implements AutoCloseable {
         if (hasException()) {
             //raw result is nullified
             _rows = null;
-            throw new Exception.TODO(exception());
+            throw new JmvcException.TODO(exception());
         }
         return this;
     }

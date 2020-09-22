@@ -1,6 +1,5 @@
 package jmvc.model.sql;
 
-import jmvc.model.QueryResult;
 import jmvc.model.Table;
 import jmvc.model.Where;
 
@@ -15,11 +14,6 @@ public class SqlWhere extends Where {
                 _select.getStatement(),
                 _stmt
         );
-    }
-
-    @Override
-    public QueryResult execute() {
-        return getTable().executeQuery(getStatement());
     }
 
     @Override
