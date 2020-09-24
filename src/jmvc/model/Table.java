@@ -153,6 +153,16 @@ public abstract class Table<E extends Enum<E>> {
 
     public abstract QueryResult executeQuery(String statement);
 
+    /**
+     * Select col value from cols.
+     * @param cols columns from "select *"
+     * @param col column field
+     * @return column value
+     */
+    public Object getVal(Object[] cols, Enum<E> col) {
+        return cols[col.ordinal()];
+    }
+
     public final String name;
     protected final Enum<E>[] _config;
     protected final EnumSet<E> _configSet;
