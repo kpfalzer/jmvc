@@ -118,6 +118,14 @@ public class Tag {
     protected List<Object> _items = null;
     public final String name;
 
+    public static Tag div(String... items) {
+        return new Tag("div", (Object[]) items);
+    }
+
+    public static Tag div(Object... items) {
+        return new Tag("div", items);
+    }
+
     public static Tag th(String... items) {
         return new Tag("th", (Object[]) items);
     }
@@ -139,7 +147,7 @@ public class Tag {
     }
 
     public static Tag td(Object... items) {
-        return new Tag("th", items);
+        return new Tag("td", items);
     }
 
     public static Tag tbody(String... items) {
