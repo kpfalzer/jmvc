@@ -11,17 +11,33 @@ public class Html {
     private static final String _APP_VIEW_TMPL =
             System.getProperty(APP_VIEW_TMPL, "views/application.x.html");
 
-    public static String htmlify(String pathToHtmlTmpl, Object... keyVals) throws IOException {
-        invariant(isEven(keyVals.length));
-        String path = getViewFileName(_APP_VIEW_TMPL);
-        path = getViewFileName(pathToHtmlTmpl);
-        String content = "";
-        content = readFile(getViewFileName(_APP_VIEW_TMPL))
-                .replace("<!--@body@-->", readFile(getViewFileName(pathToHtmlTmpl)));
+    private static String replace(String content, Object... keyVals) {
         for (int i = 0; i < keyVals.length; i += 2) {
             String key = "<!--@" + keyVals[i] + "@-->";
             content = content.replace(key, keyVals[i + 1].toString());
         }
-        return content.toString();
+        return content;
+    }
+
+    public static String partialHtmlify(String pathToHtmlTmpl, Object... keyVals) throws IOException {
+        String path = getViewFileName(pathToHtmlTmpl);
+        String content = "";
+        content = replace(readFile(path), keyVals);
+        return content;
+    }
+
+    /**
+     * Generate toplevel HTML response.
+     *
+     * @param pathToHtmlTmpl
+     * @param keyVals
+     * @return
+     * @throws IOException
+     */
+    public static String htmlify(String pathToHtmlTmpl, Object... keyVals) throws IOException {
+        String body = partialHtmlify(pathToHtmlTmpl, keyVals);
+        String html = partialHtmlify(_APP_VIEW_TMPL, "body", body);
+        //in case we modify something in app-view
+        return replace(html, keyVals);
     }
 }

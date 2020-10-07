@@ -23,6 +23,7 @@ public abstract class RequestHandler implements HttpHandler {
     public static final String TEXT_CSS = "text/css";
     public static final String TEXT_JS = "text/javascript";
     public static final String RAW_TYPE = "*/*";
+    public static final String APPL_JSON = "application/json";
 
     public RequestHandler sendResponse(byte[] response, String type) throws IOException {
         return sendResponse(HTTP_OK, response, type);
@@ -30,6 +31,10 @@ public abstract class RequestHandler implements HttpHandler {
 
     public RequestHandler sendResponse(String response, String type) throws IOException {
         return sendResponse(HTTP_OK, response, type);
+    }
+
+    public RequestHandler sendJsonResponse(String response) throws IOException {
+        return sendResponse(HTTP_OK, response, APPL_JSON);
     }
 
     public RequestHandler sendBadResponse(int rcode) throws IOException {
@@ -93,7 +98,7 @@ public abstract class RequestHandler implements HttpHandler {
     }
 
     public String getAccept() {
-        return _accept;
+        return isNonNull(_accept) ? _accept : RAW_TYPE;
     }
 
     public String getResponseType() {
@@ -128,7 +133,7 @@ public abstract class RequestHandler implements HttpHandler {
     }
 
     public boolean hasBody() {
-        return isNonNull(_body);
+        return isNonNull(_body) && !_body.isEmpty();
     }
 
     public Object[] bodyAsObjAry() {
@@ -172,6 +177,7 @@ public abstract class RequestHandler implements HttpHandler {
                 p = kv.indexOf('=');
                 String k = (0 < p) ? kv.substring(0, p) : kv;
                 String v = (0 < p) ? kv.substring(p + 1) : null;
+                //TODO: decode %nn in v: see https://www.w3schools.com/tags/ref_urlencode.ASP
                 //TODO: repeated param overwrites here.  Do we want to append->list?
                 _uriParams.put(k, v);
             }

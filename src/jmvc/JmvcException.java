@@ -1,5 +1,7 @@
 package jmvc;
 
+import static gblibx.Util.getLocalDateTime;
+
 public class JmvcException extends RuntimeException {
     public JmvcException(String message) {
         super(message);
@@ -12,6 +14,7 @@ public class JmvcException extends RuntimeException {
     }
 
     public static void printStackTrace(Exception ex) {
+        System.err.println(getLocalDateTime());
         ex.printStackTrace(System.err);
     }
 
