@@ -10,7 +10,11 @@ import static gblibx.Util.toMap;
 
 public class Json {
     public static String createResponse(Integer id) {
-        final Map<String, Object> rmap = toMap("status", 0, "result", id);
+        return createResponse(id, 0);
+    }
+
+    public static String createResponse(Integer id, int status) {
+        final Map<String, Object> rmap = toMap("status", status, "result", id);
         final JSONObject jsobj = new JSONObject(rmap);
         return jsobj.toString();
     }

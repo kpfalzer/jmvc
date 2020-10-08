@@ -151,7 +151,7 @@ public abstract class AppController<E extends Enum<E>> {
                 }
                 final Map<String, Object> kvs = bodyAsObj();
                 Integer id = _model.insertRow(kvs);
-                sendResponse(createResponse(id), "application/json");
+                sendResponse(createResponse(id), APPL_JSON);
             } catch (IOException ex) {
                 JmvcException.printStackTrace(ex);
                 throw ex;
