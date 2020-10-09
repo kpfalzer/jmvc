@@ -14,7 +14,7 @@ import static jmvc.Util.TODO;
  */
 public class Requests {
     public static void logRequest(RequestHandler request) {
-        if (LOG_JSON || !request.getRequestURI().toLowerCase().endsWith(".json")) {
+        if (LOG_POST || !request.isPOST()) {
             _theOne._logRequest(request);
         }
     }
@@ -43,7 +43,7 @@ public class Requests {
 
     public static final String LOG =
             System.getProperty("logging.Requests.LOG", "/tmp/jmvc.request.log");
-    public static final boolean LOG_JSON = false;
+    public static final boolean LOG_POST = false;
 
     private final String _fileName;
     private static final Requests _theOne = new Requests(LOG);
