@@ -1,5 +1,8 @@
 package jmvc.model;
 
+import static gblibx.Util.invariant;
+import static gblibx.Util.isEven;
+
 public abstract class Select implements Queryable {
     protected Select(Table table, String... cols) {
         this(table, false, cols);
@@ -17,7 +20,13 @@ public abstract class Select implements Queryable {
 
     public abstract Where where(String stmt);
 
-    public Where whereEQ(String lhs, String rhs) {
-        return where(String.format("%s = %s", lhs, rhs));
+    public Where whereEQ(String... lhsRhs) {
+        invariant(isEven(lhsRhs.length));
+        StringBuilder q = new StringBuilder();
+        for (int i = 0; i < lhsRhs.length; i += 2) {
+            if (0 < q.length()) q.append(" AND ");
+            q.append(lhsRhs[i]).append(" = ").append(lhsRhs[i+1]);
+        }
+        return where(q.toString());
     }
 }
