@@ -20,7 +20,15 @@ public abstract class Select implements Queryable {
 
     public abstract Where where(String stmt);
 
+    public Where whereEQ(String lhs, String rhs) {
+        return _whereEQ(lhs, rhs);
+    }
+
     public Where whereEQ(String... lhsRhs) {
+        return _whereEQ(lhsRhs);
+    }
+
+    private Where _whereEQ(String... lhsRhs) {
         invariant(isEven(lhsRhs.length));
         StringBuilder q = new StringBuilder();
         for (int i = 0; i < lhsRhs.length; i += 2) {
