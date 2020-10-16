@@ -11,7 +11,7 @@ public class Html {
     private static final String _APP_VIEW_TMPL =
             System.getProperty(APP_VIEW_TMPL, "views/application.x.html");
 
-    private static String replace(String content, Object... keyVals) {
+    public static String replace(String content, Object... keyVals) {
         for (int i = 0; i < keyVals.length; i += 2) {
             String key = "<!--@" + keyVals[i] + "@-->";
             content = content.replace(key, keyVals[i + 1].toString());

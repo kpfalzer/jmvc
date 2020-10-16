@@ -37,6 +37,10 @@ public abstract class RequestHandler implements HttpHandler {
         return sendResponse(HTTP_OK, response, APPL_JSON);
     }
 
+    public RequestHandler sendHtmlResponse(String response) throws IOException {
+        return sendResponse(HTTP_OK, response, TEXT_HTML);
+    }
+
     public RequestHandler sendBadResponse(int rcode) throws IOException {
         return sendResponse(rcode, "", TEXT_HTML);
     }
