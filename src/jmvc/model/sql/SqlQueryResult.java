@@ -4,8 +4,12 @@ import jmvc.JmvcException;
 import jmvc.model.QueryResult;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
+
+import static gblibx.Util.now;
+import static gblibx.Util.secToNow;
 
 public class SqlQueryResult extends QueryResult implements AutoCloseable {
     public SqlQueryResult(SqlDatabase dbase, String sqlQuery) {
@@ -18,7 +22,18 @@ public class SqlQueryResult extends QueryResult implements AutoCloseable {
         return qr.executeQuery();
     }
 
+    private void debug(LocalDateTime started) {
+        String where = Thread.currentThread().getStackTrace()[2].toString();
+        String query = _sqlQuery.replaceAll("\\s+"," ");
+        System.err.println(String.format("DEBUG: %s: %s took %.1f sec",
+                where, query, secToNow(started)));
+    }
+
+    private static final boolean _DEBUG = Boolean.valueOf(
+            System.getProperty("jmvc.SqlQueryResult.DEBUG", "false"));
+
     public SqlQueryResult executeQuery() {
+        final LocalDateTime dt1 = now();
         _conn = _dbase.getConnection();
         try {
             _stmt = _conn.createStatement();
@@ -34,6 +49,7 @@ public class SqlQueryResult extends QueryResult implements AutoCloseable {
             _rows = null;
             throw new JmvcException.TODO(exception());
         }
+        if (_DEBUG) debug(dt1);
         return this;
     }
 
