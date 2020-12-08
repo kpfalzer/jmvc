@@ -88,7 +88,11 @@ public class PreparedStatementX implements AutoCloseable {
     @Override
     public void close() {
         if (isNonNull(_pstmt)) {
-            SqlDatabase.sclose(_pstmt);
+            try {
+                _pstmt.close();
+            } catch (SQLException throwables) {
+                ;//do nothing
+            }
             _pstmt = null;
         }
     }

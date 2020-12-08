@@ -10,13 +10,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static gblibx.Util.downcast;
-import static gblibx.Util.isNonNull;
-import static gblibx.Util.upcase;
+import static gblibx.Util.*;
 
 public class SqlDatabase extends Database {
     public SqlDatabase(Config config) {
         super(config);
+    }
+
+    public Connection getConnection() {
+        return toConnection(_getConnection());
     }
 
     public String getSchema() {
@@ -28,7 +30,7 @@ public class SqlDatabase extends Database {
         } catch (SQLException e) {
             exception = e;
         } finally {
-            xclose(conn);
+            close();
         }
         if (isNonNull(exception)) {
             throw new JmvcException.TODO(exception);
@@ -37,94 +39,53 @@ public class SqlDatabase extends Database {
     }
 
     @Override
+    protected void _closeActualConnection(Object connection) {
+        try {
+            toConnection(connection).close();
+        } catch (Exception ex) {
+            ;//ignore
+        }
+    }
+
+    @Override
+    protected Object _getNewConnection() {
+        final Config config = super._config;
+        Connection connection = null;
+        SQLException exception = null;
+        try {
+            connection = DriverManager.getConnection(config.requireProperty(URL), config);
+            connection.setSchema(SCHEMA);
+        } catch (SQLException ex) {
+            close();
+            throw new JmvcException.TODO(ex);
+        }
+        if (false) logMessage("DEBUG:connection: " + connection.toString());
+        return connection;
+    }
+
+    @Override
+    public boolean isConnectionValid(Object connection) {
+        boolean isValid = false;
+        try {
+            String catalog = toConnection(connection).getCatalog();
+            isValid = true;
+        } catch (Exception ex) {
+            ;//ignore
+        }
+        return isValid;
+    }
+
+    private static Connection toConnection(Object connection) {
+        return castobj(connection);
+    }
+
+    @Override
     public Object query(String statement) {
         return SqlQueryResult.executeQuery(this, statement);
     }
 
-    public void close(Connection conn) {
-        sclose(conn);
-    }
-
-    public static void sclose(Connection conn) {
-        SqlDatabase.xclose(conn);
-    }
-
-    public void close(Statement stmt) {
-        sclose(stmt);
-    }
-
-    public static void sclose(Statement stmt) {
-        Connection conn = null;
-        if (isNonNull(stmt))
-            try {
-                conn = stmt.getConnection();
-            } catch (SQLException e) {
-                ;//ignore
-            }
-        xclose(stmt, conn);
-    }
-
-    public void close(ResultSet rs) {
-        sclose(rs);
-    }
-
-    public static void sclose(ResultSet rs) {
-        Connection conn = null;
-        Statement stmt = null;
-        if (isNonNull(rs))
-            try {
-                stmt = rs.getStatement();
-            } catch (SQLException e) {
-                ;//ignore
-            }
-        if (isNonNull(stmt))
-            try {
-                conn = stmt.getConnection();
-            } catch (SQLException e) {
-                ;//ignore
-            }
-        sclose(conn, stmt, rs);
-    }
-
-    public void close(Connection conn, ResultSet rs) {
-        sclose(conn, rs);
-    }
-
-    public static void sclose(Connection conn, ResultSet rs) {
-        Statement stmt = null;
-        if (isNonNull(rs))
-            try {
-                stmt = rs.getStatement();
-            } catch (SQLException e) {
-                ;//ignore
-            }
-        sclose(conn, stmt, rs);
-    }
-
-    public void close(Connection conn, Statement stmt, ResultSet rs) {
-        sclose(conn, stmt, rs);
-    }
-
-    public static void sclose(Connection conn, Statement stmt, ResultSet rs) {
-        xclose(rs, stmt, conn);
-    }
-
-    /**
-     * Close items.
-     * Order is important: i.e., close ResultSet, then Statement, then Connection.
-     *
-     * @param closeables AutoCloseable items.
-     */
-    private static void xclose(AutoCloseable... closeables) {
-        for (AutoCloseable ele : closeables) {
-            if (isNonNull(ele)) {
-                try {
-                    ele.close();
-                } catch (java.lang.Exception e) {
-                    ;//ignore
-                }
-            }
-        }
+    public void close() {
+        closeConnection();
     }
 
     public boolean hasTable(String shortTblName) {
@@ -140,26 +101,12 @@ public class SqlDatabase extends Database {
         } catch (SQLException e) {
             exception = e;
         } finally {
-            xclose(conn, rs);
+            close();
         }
         if (isNonNull(exception)) {
             throw new JmvcException.TODO(exception);
         }
         return result;
-    }
-
-    public Connection getConnection() {
-        final Config config = super._config;
-        Connection connection = null;
-        SQLException exception = null;
-        try {
-            connection = DriverManager.getConnection(config.requireProperty(URL), config);
-            connection.setSchema(SCHEMA);
-        } catch (SQLException ex) {
-            xclose(connection);
-            throw new JmvcException.TODO(ex);
-        }
-        return connection;
     }
 
     public static SqlDatabase myDbase(Database dbase) {
@@ -182,14 +129,16 @@ public class SqlDatabase extends Database {
         try {
             stmt = conn.createStatement();
             stmt.execute(statement);
-            if (hasResult)
+            if (hasResult) {
                 rset = stmt.getResultSet();
+            } else {
+                close();
+            }
         } catch (SQLException e) {
             exception = e;
-        } finally {
-            xclose(stmt, conn);
         }
         if (isNonNull(exception)) {
+            close();
             throw new JmvcException.TODO(exception);
         }
         return rset;

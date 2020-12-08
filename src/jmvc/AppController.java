@@ -53,10 +53,13 @@ public abstract class AppController<E extends Enum<E>> {
             @Override
             public void handle(ViewHandler handler) {
                 xhandler.accept(handler);
+                boolean debug = true;
+                App.closeDbaseConnection();
             }
         });
         return this;
     }
+
 
     /**
      * Handler to delegate between router and view.
@@ -75,7 +78,7 @@ public abstract class AppController<E extends Enum<E>> {
         }
 
         public <T> T getUriParamVal(String key, Function<String, T> convert, T defaultVal) {
-            String sval = gblibx.Util.applyIfNotNull(getUriParams(), (m)->m.get(key));
+            String sval = gblibx.Util.applyIfNotNull(getUriParams(), (m) -> m.get(key));
             return (isNull(sval))
                     ? defaultVal
                     : applyConversion(sval, convert, defaultVal);
@@ -83,10 +86,11 @@ public abstract class AppController<E extends Enum<E>> {
 
         /**
          * Apply conversion and catch exception to force default.
-         * @param sval lookup value.
-         * @param convert conversion function.
+         *
+         * @param sval       lookup value.
+         * @param convert    conversion function.
          * @param defaultVal default value.
-         * @param <T> type of return value.
+         * @param <T>        type of return value.
          * @return converted sval or defaultVal.
          */
         private static <T> T applyConversion(String sval, Function<String, T> convert, T defaultVal) {

@@ -5,23 +5,12 @@ import jmvc.JmvcException;
 import jmvc.model.*;
 
 import java.sql.*;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static gblibx.Util.append;
-import static gblibx.Util.arrayFill;
-import static gblibx.Util.castobj;
-import static gblibx.Util.isNonNull;
-import static gblibx.Util.join;
-import static gblibx.Util.upcase;
+import static gblibx.Util.*;
 import static java.util.Objects.isNull;
 
 public class SqlTable<E extends Enum<E>> extends Table {
@@ -40,24 +29,6 @@ public class SqlTable<E extends Enum<E>> extends Table {
 
     private SqlDatabase dbase() {
         return SqlDatabase.myDbase(_dbase);
-    }
-
-    private void close(Connection conn) {
-        dbase().close(conn);
-    }
-
-    /**
-     * Close ResultSet, Statement and Connection.
-     * NOTE: only use at very end of connection use.
-     *
-     * @param rs
-     */
-    private void close(ResultSet rs) {
-        dbase().close(rs);
-    }
-
-    private void close(Statement stmt) {
-        dbase().close(stmt);
     }
 
     /**
@@ -101,11 +72,14 @@ public class SqlTable<E extends Enum<E>> extends Table {
                 Util.Pair<String, ColumnInfo> info = create(rs, primaryKeys);
                 _colInfo[getColInfoOrdinal(info.v1)] = info.v2;
             }
-            //rs.close -> __close(rs) for thorough cleanup
         } catch (SQLException e) {
             exception = e;
         } finally {
-            close(rs);
+            try {
+                rs.close();
+            } catch (SQLException e) {
+                exception = e;
+            }
         }
         if (isNonNull(exception)) {
             throw new JmvcException.TODO(exception);
@@ -147,6 +121,11 @@ public class SqlTable<E extends Enum<E>> extends Table {
         dbase().executeStatementNoResult(xstmt.toString());
     }
 
+    private int error(SQLException ex) {
+        logException(ex);
+        return -1;
+    }
+
     @Override
     public int insertRow(Object... colVals) {
         if (isNull(_insertRow)) {
@@ -157,7 +136,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
         } catch (SQLException ex) {
             //TODO: need to deal w/ exception here, since we dont propagate exception
             //through method signature.
-            throw new JmvcException.TODO(ex);
+            return error(ex);
         }
     }
 
@@ -199,7 +178,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
             //TODO: need to deal w/ exception here, since we dont propagate exception
             //through method signature.
             //TODO: log message;
-            return -1;
+            return error(ex);
         }
     }
 
@@ -226,11 +205,35 @@ public class SqlTable<E extends Enum<E>> extends Table {
         return dbase().getConnection();
     }
 
-    private static void executeUpdate(PreparedStatement pstmt) throws SQLException {
-        int rowCnt = pstmt.executeUpdate();
+    private int executeUpdate(PreparedStatement pstmt) throws SQLException {
+        int rowCnt = 0, rval = -1;
+        //debug: boolean[] isClosed = {false, false, false};
+        try {
+            //debug: isClosed[0] = pstmt.isClosed();
+            rowCnt = pstmt.executeUpdate();
+            //debug: isClosed[1] = pstmt.isClosed();
+            {
+                try {
+                    ResultSet rs = pstmt.getGeneratedKeys();
+                    //debug: isClosed[2] = rs.isClosed();
+                    if (rs.next()) {
+                        int colCnt = rs.getMetaData().getColumnCount();
+                        if (1 != colCnt) {
+                            throw new JmvcException.TODO("Unexpected column count: " + colCnt);
+                        }
+                        rval = rs.getInt(1);
+                    }
+                } catch (SQLException ex) {
+                    throw ex;
+                }
+            }
+        } catch (SQLException ex) {
+            throw ex;
+        }
         if (1 != rowCnt) {
             throw new JmvcException.TODO("Expected 1 row");
         }
+        return rval;
     }
 
     /**
@@ -245,13 +248,23 @@ public class SqlTable<E extends Enum<E>> extends Table {
             if ((2 * _pstmt.numPositions) != colVals.length) {
                 throw new JmvcException.TODO("Invalid # of values");
             }
-            final Connection conn = connection();
-            PreparedStatement pstmt = (_hasID)
-                    ? _pstmt.getPreparedStatement(conn, Statement.RETURN_GENERATED_KEYS, colVals)
-                    : _pstmt.getPreparedStatement(conn, colVals);
-            executeUpdate(pstmt);
-            final int id = (_hasID) ? getResultId(pstmt) : -1;
-            _pstmt.close();
+            Connection conn;
+            PreparedStatement pstmt;
+            int id = -1;
+            try {
+                int rid = -1;
+                synchronized (this) {
+                    conn = connection();
+                    pstmt = (_hasID)
+                            ? _pstmt.getPreparedStatement(conn, Statement.RETURN_GENERATED_KEYS, colVals)
+                            : _pstmt.getPreparedStatement(conn, colVals);
+                    rid = executeUpdate(pstmt);
+                    _pstmt.close();
+                }
+                if (_hasID) id = rid;
+            } catch (SQLException ex) {
+                throw ex;
+            }
             return id;
         }
 
@@ -287,20 +300,6 @@ public class SqlTable<E extends Enum<E>> extends Table {
         private boolean _hasID = false;
     }
 
-    private static int getResultId(PreparedStatement pstmt) throws SQLException {
-        int rval = -1;
-        ResultSet rs = pstmt.getGeneratedKeys();
-        if (rs.next()) {
-            int colCnt = rs.getMetaData().getColumnCount();
-            if (1 != colCnt) {
-                throw new JmvcException.TODO("Unexpected column count: " + colCnt);
-            }
-            rval = rs.getInt(1);
-            rs.close();
-        }
-        return rval;
-    }
-
     private final Function<Object, Integer> getOrdinal = new Function<Object, Integer>() {
         @Override
         public Integer apply(Object o) {
@@ -326,13 +325,15 @@ public class SqlTable<E extends Enum<E>> extends Table {
         }
 
         private int execute(int id, Object... xcolVals) throws SQLException {
+            int rid = -1;
             PreparedStatementX pstmtx = getPstmt(xcolVals);
             //Then add ID
             Object[] colVals = append(xcolVals, getEnumOfCol("ID"), id);
-            PreparedStatement pstmt = pstmtx.getPreparedStatement(connection(), Statement.RETURN_GENERATED_KEYS, colVals);
-            executeUpdate(pstmt);
-            final int rid = getResultId(pstmt);
-            pstmtx.close();
+            synchronized (this) {
+                PreparedStatement pstmt = pstmtx.getPreparedStatement(connection(), Statement.RETURN_GENERATED_KEYS, colVals);
+                rid = executeUpdate(pstmt);
+                pstmtx.close();
+            }
             return rid;
         }
 

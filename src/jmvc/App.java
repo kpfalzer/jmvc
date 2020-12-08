@@ -28,6 +28,18 @@ public abstract class App {
         return _theOne;
     }
 
+    /**
+     * Close dbase connection for current thread.
+     */
+    public static void closeDbaseConnection() {
+        theOne()._closeDbaseConnection();
+    }
+
+    /**
+     * Close dbase connection for current thread.
+     */
+    protected abstract void _closeDbaseConnection();
+
     public void start() throws InterruptedException {
         theOne()._server.start();
         Thread.currentThread().join();

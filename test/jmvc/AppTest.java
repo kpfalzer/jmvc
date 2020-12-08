@@ -73,6 +73,11 @@ class AppTest {
         protected MyApp(String host, int port) throws IOException {
             super(host, port);
         }
+
+        @Override
+        protected void _closeDbaseConnection() {
+            dbase.closeConnection();
+        }
     }
 
     static class TeacherController extends AppController {

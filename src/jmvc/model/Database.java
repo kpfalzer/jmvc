@@ -3,12 +3,13 @@ package jmvc.model;
 import jmvc.Config;
 import jmvc.model.sql.SqlDatabase;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static gblibx.Util.expectNever;
-import static gblibx.Util.expectNonNull;
-import static gblibx.Util.invariant;
+import static gblibx.Util.*;
+import static java.util.Objects.isNull;
 
 /**
  * Model base class.
@@ -39,7 +40,63 @@ public abstract class Database {
     public abstract String getSchema();
 
     /**
-     * Quesry database.
+     * Get a connection object for current thread id.
+     *
+     * @return valid connection (could be null).
+     */
+    protected Object _getConnection() {
+        Object connection = null;
+        final long threadId = getCurrentThreadId();
+        if (_connectionByThreadId.containsKey(threadId)) {
+            connection = _connectionByThreadId.get(threadId);
+            if (!isConnectionValid(connection)) {
+                connection = null;
+                _connectionByThreadId.remove(threadId);
+            }
+        }
+        if (isNull(connection)) {
+            connection = _getNewConnection();
+            if (isNonNull(connection)) {
+                _connectionByThreadId.put(threadId, connection);
+            }
+        }
+        return connection;
+    }
+
+    public void closeConnection() {
+        final long threadId = getCurrentThreadId();
+        Object connection = _connectionByThreadId.get(threadId);
+        if (isNonNull(connection)) {
+            _closeActualConnection(connection);
+        }
+        _connectionByThreadId.remove(threadId);
+    }
+
+    /**
+     * (Implementation) closes actual connection.
+     * @param connection connection object.
+     */
+    protected abstract void _closeActualConnection(Object connection);
+
+    /**
+     * Create new connection to Database.
+     * @return Database connection or null.
+     */
+    protected abstract Object _getNewConnection();
+
+    /**
+     * (Implementation) validates if connection still valid/(re)usable.
+     * @param connection connection to validate.
+     * @return true if (still) usable.
+     */
+    public abstract boolean isConnectionValid(Object connection);
+
+    //Thread safe map
+    private static Map<Long, Object> _connectionByThreadId = new ConcurrentHashMap<>();
+
+    /**
+     * Query database.
+     *
      * @param statement Query command.
      * @return query result.
      */

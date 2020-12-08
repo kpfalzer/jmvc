@@ -61,7 +61,12 @@ public class SqlQueryResult extends QueryResult implements AutoCloseable {
 
     @Override
     public void close() {
-        _dbase.sclose(_conn, _stmt, _rs);
+        try {
+            _stmt.close();
+            _conn.close();
+        } catch (SQLException ex) {
+            ;//do nothing
+        }
     }
 
     private SqlQueryResult updateColInfo() throws SQLException {
