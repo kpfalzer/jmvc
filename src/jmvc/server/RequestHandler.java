@@ -12,7 +12,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static gblibx.Util.*;
@@ -51,8 +51,10 @@ public abstract class RequestHandler implements HttpHandler {
 
     public RequestHandler sendResponse(int rcode, byte[] response, String type) throws IOException {
         final int length = response.length;
-        _exchange.getResponseHeaders().add("Content-type", type);
-        _exchange.getResponseHeaders().add("Content-length", Integer.toString(length));
+        final Headers headers = _exchange.getResponseHeaders();
+        headers.add("Content-type", type);
+        headers.add("Content-length", Integer.toString(length));
+        headers.add("Expires", "0");  //do not cache
         _exchange.sendResponseHeaders(rcode, length);
         _exchange.getResponseBody().write(response);
         _exchange.close();
@@ -78,7 +80,7 @@ public abstract class RequestHandler implements HttpHandler {
         _accept = _reqHeaders.getFirst(ACCEPT);
         _contentType = _reqHeaders.getFirst(CONTENT_TYPE);
         Requests.logRequest(this);
-        setURI().readBody().bodyAsJSON();
+        setURI().setURIParams().readBody().bodyAsJSON().addBodyParams();
     }
 
     public long getID() {
@@ -128,11 +130,11 @@ public abstract class RequestHandler implements HttpHandler {
         return this;
     }
 
-    public boolean hasUriParams() {
-        return isNonNull(getUriParams());
+    public boolean hasURIParams() {
+        return !getURIParams().isEmpty();
     }
 
-    public Map<String, String> getUriParams() {
+    public Map<String, List<String>> getURIParams() {
         return _uriParams;
     }
 
@@ -169,25 +171,31 @@ public abstract class RequestHandler implements HttpHandler {
         return this;
     }
 
+    private RequestHandler addBodyParams() {
+        if (isPOST() && hasBody() && (_bodyType == EBodyType.eUnknown)) {
+            Map<String,List<String>> bodyParms = getURLParams(_body.trim());
+            bodyParms.forEach((key, value) -> {
+                if (! _uriParams.containsKey(key)) {
+                    _uriParams.put(key, value);
+                } else {
+                    _uriParams.get(key).addAll(value);
+                }
+            });
+        }
+        return this;
+    }
+
     private RequestHandler setURI() {
-        //todo: how do funny chars appear?
         String uri = _exchange.getRequestURI().toString();
         int p = uri.indexOf('?');
-        if (0 <= p) {
-            _uri = uri.substring(0, p);
-            uri = uri.substring(p + 1);
-            _uriParams = new HashMap<>();
-            for (String kv : uri.split("&")) {
-                p = kv.indexOf('=');
-                String k = (0 < p) ? kv.substring(0, p) : kv;
-                String v = (0 < p) ? kv.substring(p + 1) : null;
-                //TODO: decode %nn in v: see https://www.w3schools.com/tags/ref_urlencode.ASP
-                //TODO: repeated param overwrites here.  Do we want to append->list?
-                _uriParams.put(k, v);
-            }
-        } else {
-            _uri = uri;
-        }
+        _uri = (0 <= p) ? uri.substring(0, p) : uri;
+        return this;
+    }
+
+    private RequestHandler setURIParams() {
+        String uri = _exchange.getRequestURI().toString();
+        int p = uri.indexOf('?');
+        _uriParams = getURLParams((0 <= p) ? uri.substring(p + 1) : null);
         return this;
     }
 
@@ -212,7 +220,7 @@ public abstract class RequestHandler implements HttpHandler {
     protected EBodyType _bodyType = EBodyType.eNone;
     protected Object _bodyObj;
     protected JmvcException _exception;
-    protected Map<String, String> _uriParams = null;
+    protected Map<String, List<String>> _uriParams = null;
     protected long _rhid;
 
     // unique ID for every handler instance.

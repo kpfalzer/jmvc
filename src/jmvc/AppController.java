@@ -5,6 +5,10 @@ import jmvc.model.Table;
 import jmvc.server.RequestHandler;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -77,8 +81,19 @@ public abstract class AppController<E extends Enum<E>> {
             _view.handle(this);
         }
 
-        public <T> T getUriParamVal(String key, Function<String, T> convert, T defaultVal) {
-            String sval = gblibx.Util.applyIfNotNull(getUriParams(), (m) -> m.get(key));
+        /**
+         * Get scalar parameter.
+         *
+         * @param key        parameter name.
+         * @param convert    funciton to convert value to T.
+         * @param defaultVal default value.
+         * @param <T>        type of value expected.
+         * @return converted value or default.
+         */
+        public <T> T getURIParamVal(String key, Function<String, T> convert, T defaultVal) {
+            List<String> vals = getURIParams().get(key);
+            //pick off last element
+            String sval = (isNull(vals) || vals.isEmpty()) ? null : vals.get(vals.size()-1);
             return (isNull(sval))
                     ? defaultVal
                     : applyConversion(sval, convert, defaultVal);
@@ -103,15 +118,34 @@ public abstract class AppController<E extends Enum<E>> {
             return rval;
         }
 
-        public Integer getUriParamVal(String key, int defaultVal) {
-            return getUriParamVal(key, (String s) -> {
+        /**
+         * Get scalar parameter value.
+         *
+         * @param key        parameter name.
+         * @param defaultVal default value.
+         * @return value or default.
+         */
+        public Integer getURIParamVal(String key, int defaultVal) {
+            return getURIParamVal(key, (String s) -> {
                 return Integer.parseInt(s);
             }, defaultVal);
         }
 
-        public String getUriParamVal(String key, String defaultVal) {
-            return getUriParamVal(key, (String s) -> {
-                return s;
+        /**
+         * Get scalar parameter value.
+         *
+         * @param key        parameter name.
+         * @param defaultVal default value.
+         * @return value or default.
+         */
+        public String getURIParamVal(String key, String defaultVal) {
+            return getURIParamVal(key, (String s) -> {
+                try {
+                    return URLDecoder.decode(s, StandardCharsets.UTF_8.toString());
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return s;
+                }
             }, defaultVal);
         }
 
