@@ -4,13 +4,11 @@ import jmvc.Config;
 import jmvc.JmvcException;
 import jmvc.model.Database;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.Random;
 
 import static gblibx.Util.*;
+import static java.util.Objects.isNull;
 
 public class SqlDatabase extends Database {
     public SqlDatabase(Config config) {
@@ -47,18 +45,45 @@ public class SqlDatabase extends Database {
         }
     }
 
+    private static final int _MAXWAIT_MS = 3 * 60 * 1000; //3 min
+
     @Override
     protected Object _getNewConnection() {
         final Config config = super._config;
         Connection connection = null;
+        Random rnd = null;
         SQLException exception = null;
-        try {
-            connection = DriverManager.getConnection(config.requireProperty(URL), config);
-            connection.setSchema(SCHEMA);
-        } catch (SQLException ex) {
-            close();
-            throw new JmvcException.TODO(ex);
+        long waited = 0;
+        while (waited < _MAXWAIT_MS) {
+            try {
+                connection = DriverManager.getConnection(config.requireProperty(URL), config);
+                connection.setSchema(SCHEMA);
+                exception = null;
+                break;
+            } catch (SQLNonTransientConnectionException ex) {
+                exception = ex;
+                close();
+                connection = null;
+                if (isNull(rnd)) {
+                    rnd = new Random();
+                }
+                long dilly = 250 + rnd.nextInt(750); //[0,750]
+                waited += dilly;
+                if (false) logMessage(String.format("DEBUG:_getNewConnection(): waited=%d, dilly=%d",waited,dilly));
+                try {
+                    Thread.sleep(dilly);
+                } catch (InterruptedException e) {
+                    ;//ignore
+                }
+            } catch (SQLException ex) {
+                close();
+                throw new JmvcException.TODO(ex);
+            }
         }
+        if (isNonNull(exception)) {
+            throw new JmvcException(exception);
+        }
+        if (true && (0 < waited)) logMessage(String.format("DEBUG:_getNewConnection(): waited=%d",waited));
         if (false) logMessage("DEBUG:connection: " + connection.toString());
         return connection;
     }
