@@ -19,7 +19,7 @@ public class Json {
         return jsobj.toString();
     }
 
-    public static <T> JSONArray toJsonArray(List<T> eles, Function<T, Map<String, Object>> toMap) {
+    public static <T> JSONArray toJsonArray(Iterable<T> eles, Function<T, Map<String, Object>> toMap) {
         List<Object> valsAsMap = new LinkedList<>();
         for (T v : eles) {
             Map<String, Object> valAsMap = toMap.apply(v);
@@ -28,7 +28,7 @@ public class Json {
         return new JSONArray(valsAsMap.toArray());
     }
 
-    public static <T> String createResponse(List<T> eles, Function<T, Map<String, Object>> toMap) {
+    public static <T> String createResponse(Iterable<T> eles, Function<T, Map<String, Object>> toMap) {
         return toJsonArray(eles, toMap).toString();
     }
 
