@@ -273,12 +273,16 @@ public class SqlTable<E extends Enum<E>> extends Table {
             List<String> colNames = new LinkedList<>();
             for (Enum col : _config) {
                 final int ordinal = col.ordinal();
-                if (!_colInfo[ordinal].hasDefaultVal()) {
+                //TODO: we cannot use PreparedStmt with (optional/defaulted) cols, since
+                //sometimes may have value and other times not.
+                //SO: we will require all cols (except ID) to be specified.
+                //if (!_colInfo[ordinal].hasDefaultVal()) {
+                if (!col.name().equalsIgnoreCase("ID")) {
                     colNames.add(col.name().toUpperCase());
                     positionByOrdinal[ordinal] = ++_numPositions;
                 } else {
                     positionByOrdinal[ordinal] = -1;
-                    _hasID |= col.name().equalsIgnoreCase("ID");
+                    _hasID |= true;//col.name().equalsIgnoreCase("ID");
                 }
             }
             StringBuilder stmt = new StringBuilder();

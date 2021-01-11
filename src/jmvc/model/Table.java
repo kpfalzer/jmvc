@@ -110,8 +110,12 @@ public abstract class Table<E extends Enum<E>> {
         Object colVals[] = new Object[2 * kvs.size()];
         int i = 0;
         for (Map.Entry<String,Object> kv : kvs.entrySet()) {
-            colVals[i++] = getEnumOfCol(kv.getKey());
-            colVals[i++] = kv.getValue();
+            try {
+                colVals[i++] = getEnumOfCol(kv.getKey());
+                colVals[i++] = kv.getValue();
+            } catch (IllegalArgumentException ex) {
+                throw new JmvcException.TODO(ex);
+            }
         }
         return insertRow(colVals);
     }
