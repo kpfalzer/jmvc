@@ -4,10 +4,10 @@ import jmvc.JmvcException;
 
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static gblibx.Util.castobj;
-import static gblibx.Util.stream;
+import static gblibx.Util.*;
 
 public abstract class Table<E extends Enum<E>> {
 
@@ -156,6 +156,8 @@ public abstract class Table<E extends Enum<E>> {
     }
 
     public abstract QueryResult executeQuery(String statement);
+
+    public abstract QueryResult executeQuery(String statement, Consumer<Object[]> forEachRow);
 
     /**
      * Select col value from cols.

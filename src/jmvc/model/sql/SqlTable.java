@@ -6,6 +6,7 @@ import jmvc.model.*;
 
 import java.sql.*;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -185,6 +186,11 @@ public class SqlTable<E extends Enum<E>> extends Table {
     @Override
     public QueryResult executeQuery(String statement) {
         return SqlQueryResult.executeQuery(dbase(), statement);
+    }
+
+    @Override
+    public QueryResult executeQuery(String statement, Consumer forEachRow) {
+        return SqlQueryResult.executeQuery(dbase(), statement, forEachRow);
     }
 
     @Override
