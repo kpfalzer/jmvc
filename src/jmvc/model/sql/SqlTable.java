@@ -189,7 +189,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
     }
 
     @Override
-    public QueryResult executeQuery(String statement, Consumer forEachRow) {
+    public QueryResult executeQuery(String statement, Function forEachRow) {
         return SqlQueryResult.executeQuery(dbase(), statement, forEachRow);
     }
 

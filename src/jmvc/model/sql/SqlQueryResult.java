@@ -7,7 +7,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static gblibx.Util.now;
 import static gblibx.Util.secToNow;
@@ -23,7 +23,9 @@ public class SqlQueryResult extends QueryResult implements AutoCloseable {
         return qr.executeQuery();
     }
 
-    public static SqlQueryResult executeQuery(SqlDatabase dbase, String sqlQuery, Consumer<Object[]> forEachRow) {
+    public static SqlQueryResult executeQuery(SqlDatabase dbase,
+                                              String sqlQuery,
+                                              Function<Object[], Boolean> forEachRow) {
         final SqlQueryResult qr = new SqlQueryResult(dbase, sqlQuery);
         return qr.executeQuery(forEachRow);
     }
@@ -38,7 +40,7 @@ public class SqlQueryResult extends QueryResult implements AutoCloseable {
     private static final boolean _DEBUG = Boolean.valueOf(
             System.getProperty("jmvc.SqlQueryResult.DEBUG", "false"));
 
-    private SqlQueryResult executeQuery(Consumer<Object[]> forEachRow) {
+    private SqlQueryResult executeQuery(Function<Object[], Boolean> forEachRow) {
         final LocalDateTime dt1 = now();
         _conn = _dbase.getConnection();
         try {
@@ -50,7 +52,7 @@ public class SqlQueryResult extends QueryResult implements AutoCloseable {
                 for (int i = 1; i <= row.length; ++i) {
                     row[i - 1] = _rs.getObject(i);
                 }
-                forEachRow.accept(row);
+                if (forEachRow.apply(row)) break;
             }
         } catch (SQLException ex) {
             _exception = ex;
@@ -70,6 +72,7 @@ public class SqlQueryResult extends QueryResult implements AutoCloseable {
         List<Object[]> rows = new LinkedList<>();
         executeQuery((row) -> {
             rows.add(row);
+            return false;
         });
         _rows = rows.toArray(new Object[rows.size()][]);
         return this;

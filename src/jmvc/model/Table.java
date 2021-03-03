@@ -4,10 +4,11 @@ import jmvc.JmvcException;
 
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static gblibx.Util.*;
+import static gblibx.Util.castobj;
+import static gblibx.Util.stream;
 
 public abstract class Table<E extends Enum<E>> {
 
@@ -157,7 +158,13 @@ public abstract class Table<E extends Enum<E>> {
 
     public abstract QueryResult executeQuery(String statement);
 
-    public abstract QueryResult executeQuery(String statement, Consumer<Object[]> forEachRow);
+    /**
+     * Raw query handler.
+     * @param statement DBMS statement to execute.
+     * @param forEachRow Process each (raw) row and return true on early terminate/close.
+     * @return result (not expected to be useful, since raw handler likely squirelled results local).
+     */
+    public abstract QueryResult executeQuery(String statement, Function<Object[], Boolean> forEachRow);
 
     /**
      * Select col value from cols.
