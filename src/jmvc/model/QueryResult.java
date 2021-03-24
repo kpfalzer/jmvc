@@ -24,6 +24,10 @@ public abstract class QueryResult {
         return (isValid()) ? _rows.length : 0;
     }
 
+    public boolean isEmpty() {
+        return 0 == nrows();
+    }
+
     public Object[][] rows() {
         return _rows;
     }
