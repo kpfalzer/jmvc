@@ -65,6 +65,9 @@ public class PreparedStatementX implements AutoCloseable {
                 final String v = castobj(val);
                 _pstmt.setTimestamp(position, Timestamp.valueOf(v));
                 break;
+            case Types.DOUBLE:
+                _pstmt.setDouble(position, castobj(val));
+                break;
             default:
                 throw new SQLException("Invalid type: " + col.type);
         }

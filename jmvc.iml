@@ -8,7 +8,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="gblibx" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -38,6 +37,16 @@
       <library>
         <CLASSES>
           <root url="jar:///opt/javalibs/mysql-connector-java-8.0.20/mysql-connector-java-8.0.20.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module" module-name="gblibx" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../gblibx/lib/json-20180130.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
