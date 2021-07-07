@@ -176,6 +176,10 @@ public abstract class Table<E extends Enum<E>> {
         return cols[col.ordinal()];
     }
 
+    public static <E extends Enum<E>,T> T valueOf(Object[] cols, Enum<E> col) {
+        return castobj(cols[col.ordinal()]);
+    }
+
     public final String name;
     protected final Enum<E>[] _config;
     protected final EnumSet<E> _configSet;
