@@ -94,18 +94,9 @@ public abstract class Table<E extends Enum<E>> {
      * Insert a new row into table.
      *
      * @param colVals pairs of Enum/col values.
-     * @return generated ID or -1 if no ID.
+     * @return generated ID or -1 if fail.
      */
     public abstract int insertRow(Object... colVals);
-
-    /**
-     * Select columns from Table.
-     * @param cols columns to select.
-     * @return Select object.
-     */
-    public abstract Select select(String... cols);
-
-    public abstract Select selectDistinct(String... cols);
 
     public int insertRow(Map<String, Object> kvs) {
         Object colVals[] = new Object[2 * kvs.size()];
@@ -120,6 +111,15 @@ public abstract class Table<E extends Enum<E>> {
         }
         return insertRow(colVals);
     }
+
+    /**
+     * Select columns from Table.
+     * @param cols columns to select.
+     * @return Select object.
+     */
+    public abstract Select select(String... cols);
+
+    public abstract Select selectDistinct(String... cols);
 
     /**
      * CREATE INDEX on designated columns.

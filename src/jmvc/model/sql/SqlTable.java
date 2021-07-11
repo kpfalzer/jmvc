@@ -2,16 +2,39 @@ package jmvc.model.sql;
 
 import gblibx.Util;
 import jmvc.JmvcException;
-import jmvc.model.*;
+import jmvc.model.ColumnInfo;
+import jmvc.model.Database;
+import jmvc.model.QueryResult;
+import jmvc.model.Select;
+import jmvc.model.Table;
 
-import java.sql.*;
-import java.util.*;
-import java.util.function.Consumer;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static gblibx.Util.*;
+import static gblibx.Util.append;
+import static gblibx.Util.arrayFill;
+import static gblibx.Util.castobj;
+import static gblibx.Util.invariant;
+import static gblibx.Util.isEven;
+import static gblibx.Util.isNonNull;
+import static gblibx.Util.join;
+import static gblibx.Util.logException;
+import static gblibx.Util.upcase;
 import static java.util.Objects.isNull;
 
 public class SqlTable<E extends Enum<E>> extends Table {
@@ -129,11 +152,8 @@ public class SqlTable<E extends Enum<E>> extends Table {
 
     @Override
     public int insertRow(Object... colVals) {
-        if (isNull(_insertRow)) {
-            _insertRow = new InsertRow<E>();
-        }
         try {
-            return _insertRow.execute(colVals);
+            return __insertRow(colVals);
         } catch (SQLException ex) {
             //TODO: need to deal w/ exception here, since we dont propagate exception
             //through method signature.
@@ -159,8 +179,6 @@ public class SqlTable<E extends Enum<E>> extends Table {
             dbase().executeStatementNoResult(xstmt.toString());
         }
     }
-
-    private InsertRow _insertRow = null;
 
     @Override
     public int updateTableById(int id, Object... colVals) {
@@ -242,16 +260,38 @@ public class SqlTable<E extends Enum<E>> extends Table {
         return rval;
     }
 
+    private Map<EnumSet<E>, InsertRow> __insertByCols = new HashMap<>();
+
+    private <E extends Enum<E>> int __insertRow(Object... colVals) throws SQLException {
+        final int n = colVals.length;
+        invariant(isEven(n));
+        EnumSet cols = getColsAsKey(colVals);
+        if (!__insertByCols.containsKey(cols)) {
+            __insertByCols.put(cols, new InsertRow(cols));
+        }
+        final InsertRow insert = __insertByCols.get(cols);
+        return insert.execute(colVals);
+    }
+
+    private static <E extends Enum<E>> EnumSet<E> getColsAsKey(Object... colVals) {
+        List<E> cols = new LinkedList();
+        for (int i = 0; i < colVals.length; i += 2) {
+            cols.add(castobj(colVals[i]));
+        }
+        EnumSet<E> key = EnumSet.copyOf(cols);
+        return key;
+    }
+
     /**
      * Bookeeping for INSERT prepared statement
      */
     private class InsertRow<E extends Enum<E>> {
-        private InsertRow() {
-            initialize();
+        private InsertRow(EnumSet<E> cols) {
+            initialize(cols);
         }
 
         private int execute(Object... colVals) throws SQLException {
-            if ((2 * _pstmt.numPositions) != colVals.length) {
+            if ((2 * __pstmt.numPositions) != colVals.length) {
                 throw new JmvcException.TODO("Invalid # of values");
             }
             Connection conn;
@@ -261,36 +301,29 @@ public class SqlTable<E extends Enum<E>> extends Table {
                 int rid = -1;
                 synchronized (this) {
                     conn = connection();
-                    pstmt = (_hasID)
-                            ? _pstmt.getPreparedStatement(conn, Statement.RETURN_GENERATED_KEYS, colVals)
-                            : _pstmt.getPreparedStatement(conn, colVals);
+                    pstmt = (__hasID)
+                            ? __pstmt.getPreparedStatement(conn, Statement.RETURN_GENERATED_KEYS, colVals)
+                            : __pstmt.getPreparedStatement(conn, colVals);
                     rid = executeUpdate(pstmt);
-                    _pstmt.close();
+                    __pstmt.close();
                 }
-                if (_hasID) id = rid;
+                if (__hasID) id = rid;
             } catch (SQLException ex) {
                 throw ex;
             }
             return id;
         }
 
-        private void initialize() {
+        private void initialize(EnumSet<E> cols) {
             Integer[] positionByOrdinal = new Integer[_config.length];
+            for (int i = 0; i < positionByOrdinal.length; ++i) positionByOrdinal[i] = -1;
             List<String> colNames = new LinkedList<>();
-            for (Enum col : _config) {
+            for (Enum col : cols.stream().collect(Collectors.toList())) {
                 final int ordinal = col.ordinal();
-                //TODO: we cannot use PreparedStmt with (optional/defaulted) cols, since
-                //sometimes may have value and other times not.
-                //SO: we will require all cols (except ID) to be specified.
-                //if (!_colInfo[ordinal].hasDefaultVal()) {
-                if (!col.name().equalsIgnoreCase("ID")) {
-                    colNames.add(col.name().toUpperCase());
-                    positionByOrdinal[ordinal] = ++_numPositions;
-                } else {
-                    positionByOrdinal[ordinal] = -1;
-                    _hasID |= true;//col.name().equalsIgnoreCase("ID");
-                }
+                colNames.add(col.name().toUpperCase());
+                positionByOrdinal[ordinal] = ++__numPositions;
             }
+            __hasID = Arrays.stream(_config).map(c -> c.name()).anyMatch(name -> name.equalsIgnoreCase("ID"));
             StringBuilder stmt = new StringBuilder();
             stmt
                     .append("INSERT INTO ")
@@ -302,12 +335,12 @@ public class SqlTable<E extends Enum<E>> extends Table {
                     .append(join(arrayFill(new String[colNames.size()], "?"), ","))
                     .append(')')
             ;
-            _pstmt = new PreparedStatementX(stmt.toString(), positionByOrdinal, getOrdinal, _colInfo);
+            __pstmt = new PreparedStatementX(stmt.toString(), positionByOrdinal, getOrdinal, _colInfo);
         }
 
-        private PreparedStatementX _pstmt;
-        private int _numPositions = 0;
-        private boolean _hasID = false;
+        private PreparedStatementX __pstmt;
+        private int __numPositions = 0;
+        private boolean __hasID = false;
     }
 
     private final Function<Object, Integer> getOrdinal = new Function<Object, Integer>() {
@@ -354,11 +387,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
          * @return PreparedStatement.
          */
         private PreparedStatementX getPstmt(Object... colVals) throws SQLException {
-            List<E> cols = new LinkedList();
-            for (int i = 0; i < colVals.length; i += 2) {
-                cols.add(castobj(colVals[i]));
-            }
-            EnumSet<E> key = EnumSet.copyOf(cols);
+            EnumSet<E> key = getColsAsKey(colVals);
             if (!_pstmtByCol.containsKey(key)) {
                 Integer[] positionByOrdinal = arrayFill(new Integer[_config.length], -1);
                 int currPos = 0;
@@ -368,7 +397,7 @@ public class SqlTable<E extends Enum<E>> extends Table {
                         .append(name)
                         .append(" SET ")
                 ;
-                for (E col : cols) {
+                for (E col : key.stream().collect(Collectors.toList())) {
                     if (0 < currPos)
                         stmt.append(',');
                     stmt

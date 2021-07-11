@@ -71,7 +71,7 @@ class TableTest {
                 "students",
                 EStudent.class
         );
-        if (false) {
+        if (true) {
             int id = Teachers.insertRow(ETeacher.NAME, "teacherVal1");
             Students.insertRow(
                     EStudent.NAME, "studentVal1",
