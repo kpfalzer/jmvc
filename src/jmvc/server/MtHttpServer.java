@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 
 /**
  * Simple multithreaded HTTP server.
- *
+ * <p>
  * From: https://dzone.com/articles/simple-http-server-in-java
  * even better:
  * https://dzone.com/articles/java-11-standardized-http-client-api
@@ -16,14 +16,22 @@ import java.util.concurrent.Executors;
  */
 public class MtHttpServer {
     public MtHttpServer(String host, int port) throws IOException {
+        this(host, port, BACKLOG);
+    }
+
+    public MtHttpServer(String host, int port, int backLog) throws IOException {
         _server = HttpServer.create(
-                new InetSocketAddress(host, port), BACKLOG);
+                new InetSocketAddress(host, port), backLog);
+    }
+
+    public MtHttpServer start(int nthreads) {
+        _server.setExecutor(Executors.newFixedThreadPool(nthreads));
+        _server.start();
+        return this;
     }
 
     public MtHttpServer start() {
-        _server.setExecutor(Executors.newFixedThreadPool(NTHREADS));
-        _server.start();
-        return this;
+        return start(NTHREADS);
     }
 
     public MtHttpServer stop(int delay) {
