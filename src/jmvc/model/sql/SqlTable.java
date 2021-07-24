@@ -40,10 +40,20 @@ import static java.util.Objects.isNull;
 public class SqlTable<E extends Enum<E>> extends Table {
 
     public static <E extends Enum<E>> SqlTable
+    create(Database dbase, String name, Class<E> cols) {
+        return create(dbase,name,cols,new String[0]);
+    }
+
+    public static <E extends Enum<E>> SqlTable
     create(Database dbase, String name, Class<E> cols, String... colIndex) {
         SqlTable tbl = new SqlTable(name, cols, dbase);
         tbl.createIndex(colIndex);
         return tbl;
+    }
+
+    public static <E extends Enum<E>> SqlTable
+    create(Database dbase, String name, Class<E> cols, E... colIndex) {
+        return create(dbase,name,cols,Arrays.stream(colIndex).map(e->e.toString()).toArray(String[]::new));
     }
 
     private SqlTable(String name, Class<E> cols, Database dbase) {
