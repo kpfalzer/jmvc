@@ -14,8 +14,13 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
-import static gblibx.Util.*;
+import static gblibx.Util.castobj;
+import static gblibx.Util.getURLParams;
+import static gblibx.Util.isNonNull;
+import static gblibx.Util.toArray;
+import static gblibx.Util.toMap;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 public abstract class RequestHandler implements HttpHandler {
@@ -173,9 +178,9 @@ public abstract class RequestHandler implements HttpHandler {
 
     private RequestHandler addBodyParams() {
         if (isPOST() && hasBody() && (_bodyType == EBodyType.eUnknown)) {
-            Map<String,List<String>> bodyParms = getURLParams(_body.trim());
+            Map<String, List<String>> bodyParms = getURLParams(_body.trim());
             bodyParms.forEach((key, value) -> {
-                if (! _uriParams.containsKey(key)) {
+                if (!_uriParams.containsKey(key)) {
                     _uriParams.put(key, value);
                 } else {
                     _uriParams.get(key).addAll(value);
@@ -247,5 +252,9 @@ public abstract class RequestHandler implements HttpHandler {
         public void handle(HttpExchange exchange) throws IOException {
             create().handle(exchange);
         }
+    }
+
+    public static RequestHandler handlerFactory(Supplier<RequestHandler> factory) {
+        return  factory.get();
     }
 }
