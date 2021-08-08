@@ -4,6 +4,7 @@ import jmvc.server.MtHttpServer;
 import jmvc.server.RequestHandler;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import static gblibx.Util.isNonNull;
 
@@ -19,8 +20,8 @@ public abstract class App {
         _theOne = this;
     }
 
-    public static App addRoute(String path, RequestHandler handler) {
-        theOne()._server.addRoute(path, handler);
+    public static App addRoute(String path, Supplier<RequestHandler> factory) {
+        theOne()._server.addRoute(path, factory);
         return theOne();
     }
 

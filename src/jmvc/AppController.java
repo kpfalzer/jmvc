@@ -41,7 +41,7 @@ public abstract class AppController<E extends Enum<E>> {
     protected AppController addRoute(String path, AppView view) {
         //Handler is lightweight delegate, so we do not instance
         //heavy RequestHandler for every controller instance.
-        App.addRoute(path, new ViewHandler.Delegate(view));
+        App.addRoute(path, ()->new ViewHandler(view));
         return this;
     }
 
@@ -148,30 +148,14 @@ public abstract class AppController<E extends Enum<E>> {
                 }
             }, defaultVal);
         }
-
-        private static class Delegate extends RequestHandler.Delegate {
-            private Delegate(AppView view) {
-                _view = view;
-            }
-
-            private final AppView _view;
-
-            @Override
-            public RequestHandler create() {
-                return new ViewHandler(_view);
-            }
-        }
     }
 
     /**
      * Add route for /table/create (POST+json)
      */
     protected void addDefaultCreate() {
-        // TODO: each Controller instance could have this heavyweight(?) object.
-        // TODO: we could use Handler.Delegate like as above?
-        _createHandler = new CreateHandler();
         final String path = String.format("/%s/%s", _model.name.toLowerCase(), CREATE);
-        App.addRoute(path, _createHandler);
+        App.addRoute(path, CreateHandler::new);
     }
 
     protected class CreateHandler extends RequestHandler {

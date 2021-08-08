@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 /**
  * Simple multithreaded HTTP server.
@@ -43,8 +44,23 @@ public class MtHttpServer {
         return stop(0);
     }
 
+    /*DEPRECATED: should use Supplier<...> factory pattern.
     public MtHttpServer addRoute(String path, RequestHandler handler) {
         _server.createContext(path, handler);
+        return this;
+    }
+    */
+
+    /**
+     * Preferred method to add route/path handlers, since requests should be handled
+     * in independent thread (handlers).
+     *
+     * @param path    route to add handler for.
+     * @param factory factory interface to generated handlers.
+     * @return this instance.
+     */
+    public MtHttpServer addRoute(String path, Supplier<RequestHandler> factory) {
+        _server.createContext(path, factory.get());
         return this;
     }
 

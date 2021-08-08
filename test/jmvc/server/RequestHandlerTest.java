@@ -23,8 +23,7 @@ class RequestHandlerTest {
 
     static void initialize() throws IOException {
          server = new MtHttpServer("localhost", 3005);
-         server.addRoute("/", new Handler(){
-         });
+         server.addRoute("/", Handler::new);
          server.start();
     }
 

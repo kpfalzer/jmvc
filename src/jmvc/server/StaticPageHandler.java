@@ -18,7 +18,7 @@ public class StaticPageHandler {
     }
 
     public static StaticPageHandler addDefault(String path) {
-        App.addRoute(path, _REQUEST_HANDLER);
+        App.addRoute(path, Handler::new);
         return _theOne;
     }
 
@@ -48,18 +48,7 @@ public class StaticPageHandler {
         return getAbsoluteFileName(ROOT_DIR + fname);
     }
 
-    private static final RequestHandler _REQUEST_HANDLER = new RequestHandler() {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            Handler.factory().handle(exchange);
-        }
-    };
-
     private static class Handler extends RequestHandler {
-        private static RequestHandler factory() {
-            return new Handler();
-        }
-
         private Handler() {
         }
 
