@@ -60,9 +60,10 @@ public class MtHttpServer {
      * @return this instance.
      */
     public MtHttpServer addRoute(String path, Supplier<RequestHandler> factory) {
-        _server.createContext(path, factory.get());
+        _server.createContext(path, httpExchange -> factory.get().handle(httpExchange));
         return this;
     }
+
 
     private final HttpServer _server;
     public static final Integer BACKLOG =
