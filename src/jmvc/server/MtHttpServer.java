@@ -22,7 +22,10 @@ public class MtHttpServer {
 
     public MtHttpServer(String host, int port, int backLog) throws IOException {
         _server = HttpServer.create(
-                new InetSocketAddress(host, port), backLog);
+                (host.equals("*"))
+                        ? new InetSocketAddress(port)
+                        : new InetSocketAddress(host, port)
+                , backLog);
     }
 
     public MtHttpServer start(int nthreads) {
