@@ -20,12 +20,20 @@ public class MtHttpServer {
         this(host, port, BACKLOG);
     }
 
+    public MtHttpServer(int port) throws IOException {
+        this("*", port);
+    }
+
     public MtHttpServer(String host, int port, int backLog) throws IOException {
         _server = HttpServer.create(
                 (host.equals("*"))
                         ? new InetSocketAddress(port)
                         : new InetSocketAddress(host, port)
                 , backLog);
+    }
+
+    public MtHttpServer(int port, int backLog) throws IOException {
+        this("*", port, backLog);
     }
 
     public MtHttpServer start(int nthreads) {
