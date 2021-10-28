@@ -15,11 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import static gblibx.Util.castobj;
-import static gblibx.Util.getURLParams;
-import static gblibx.Util.isNonNull;
-import static gblibx.Util.toArray;
-import static gblibx.Util.toMap;
+import static gblibx.Util.*;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 public abstract class RequestHandler implements HttpHandler {
@@ -124,9 +120,8 @@ public abstract class RequestHandler implements HttpHandler {
         if (!_reqHeaders.containsKey(CONTENT_LENGTH)) return this;
         _bodyType = EBodyType.eUnknown;
         int n = Integer.parseInt(_reqHeaders.getFirst(CONTENT_LENGTH));
-        byte buf[] = new byte[n];
         try (InputStream ins = _exchange.getRequestBody()) {
-            ins.read(buf, 0, buf.length);
+            final byte[] buf = readAllBytes(ins, n);
             _body = new String(buf, StandardCharsets.UTF_8);
         } catch (IOException e) {
             Util.TODO(e);

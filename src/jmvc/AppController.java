@@ -57,7 +57,6 @@ public abstract class AppController<E extends Enum<E>> {
             @Override
             public void handle(ViewHandler handler) {
                 xhandler.accept(handler);
-                boolean debug = true;
                 App.closeDbaseConnection();
             }
         });
