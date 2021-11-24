@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static gblibx.GbDateTime.utcnow;
 import static gblibx.RunCmd.runCommand;
 import static gblibx.Util.invariant;
 import static gblibx.Util.outOfDate;
@@ -62,8 +63,17 @@ public class Util {
         return (b == 0) ? 0 : ((100 * a) / b);
     }
 
+    public static String nowTimestamp(boolean utc) {
+        return ((utc) ? utcnow() : LocalDateTime.now())
+                .format(DT_FORMAT);
+    }
+
     public static String nowTimestamp() {
-        return LocalDateTime.now().format(DT_FORMAT);
+        return nowTimestamp(false);
+    }
+
+    public static String utcNowTimestamp() {
+        return nowTimestamp(true);
     }
 
     public static final DateTimeFormatter DT_DAY_MM_DD_YYYY = DateTimeFormatter.ofPattern("EEE-MM-dd-yyyy");

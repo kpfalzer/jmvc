@@ -5,6 +5,6 @@ public abstract class AppView {
     }
 
     //NOTE: not sure yet if this is right params?
-    public abstract void handle(AppController.ViewHandler handler);
+    public abstract void handle(BaseAppController.ViewHandler handler);
 
 }

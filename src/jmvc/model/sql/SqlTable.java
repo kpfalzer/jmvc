@@ -407,16 +407,19 @@ public class SqlTable<E extends Enum<E>> extends Table {
                         .append(name)
                         .append(" SET ")
                 ;
+                boolean hasUpdatedVal = false;
                 for (E col : key.stream().collect(Collectors.toList())) {
                     if (0 < currPos)
                         stmt.append(',');
+                    final String colName = col.name().toUpperCase();
                     stmt
-                            .append(col.name().toUpperCase())
+                            .append(colName)
                             .append("=?");
                     final int ordinal = col.ordinal();
                     positionByOrdinal[ordinal] = ++currPos;
+                    hasUpdatedVal |= colName.equalsIgnoreCase("UPDATED_AT");
                 }
-                if (hasColumn("UPDATED_AT")) {
+                if (!hasUpdatedVal && hasColumn("UPDATED_AT")) {
                     if (0 < currPos) stmt.append(',');
                     stmt.append("UPDATED_AT=CURRENT_TIMESTAMP");
                 }
