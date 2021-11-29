@@ -40,4 +40,16 @@ public class Html {
         //in case we modify something in app-view
         return replace(html, keyVals);
     }
+
+    /**
+     * Replace special chars with htmlify version, so they appear as chars (not special).
+     *
+     * @param s input string.
+     * @return htmlified string.
+     */
+    public static String htmlify(String s) {
+        return s
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
+    }
 }
