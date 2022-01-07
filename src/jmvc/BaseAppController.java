@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static gblibx.Util.index;
+import static gblibx.Util.isNonNull;
 import static java.util.Objects.isNull;
 
 /**
@@ -71,7 +73,7 @@ public abstract class BaseAppController {
          * Get scalar parameter.
          *
          * @param key        parameter name.
-         * @param convert    funciton to convert value to T.
+         * @param convert    function to convert value to T.
          * @param defaultVal default value.
          * @param <T>        type of value expected.
          * @return converted value or default.
@@ -115,6 +117,27 @@ public abstract class BaseAppController {
             return getURIParamVal(key, (String s) -> {
                 return Integer.parseInt(s);
             }, defaultVal);
+        }
+
+        /**
+         * Get explicit id param value; or, detect as /path/id.
+         *
+         * @param defaultVal default id value if not found.
+         * @return id value.
+         */
+        public Integer getIDParam(int defaultVal) {
+            Integer rval=null;
+            if (getURIParams().containsKey("id")) {
+                rval = getURIParamVal("id", defaultVal);
+            } else {
+                final String sid = index(getRequestURI().split("/"), -1);
+                try {
+                    rval = Integer.parseInt(sid);
+                } catch(Exception e) {
+                    rval = null;
+                }
+            }
+            return (isNonNull(rval)) ? rval : defaultVal;
         }
 
         /**
