@@ -1,11 +1,9 @@
 <component name="libraryTable">
   <library name="gblibx">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../gblibx/out/artifacts/gblibx_jar/gblibx.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/gblibx/bin/gblibx.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="file://$PROJECT_DIR$/../gblibx/src" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>
