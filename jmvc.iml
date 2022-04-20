@@ -39,7 +39,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="src" level="project" />
     <orderEntry type="module-library" scope="TEST">
       <library name="JUnit5.8.1">
         <CLASSES>
@@ -57,5 +56,6 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="gblibx" />
+    <orderEntry type="library" name="influxdb.client.java" level="project" />
   </component>
 </module>
