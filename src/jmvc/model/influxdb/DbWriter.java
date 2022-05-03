@@ -5,8 +5,8 @@ import com.influxdb.client.domain.WritePrecision;
 
 import static gblibx.Util.isNonNull;
 
-public class DbWriter implements ApiToken, AutoCloseable {
-    public DbWriter(InfluxDBClient client, String bucket) {
+public class DbWriter implements AutoCloseable {
+    public DbWriter(DbClient client, String bucket) {
         __bucket = bucket;
         __client = client;
     }
@@ -21,12 +21,15 @@ public class DbWriter implements ApiToken, AutoCloseable {
         return __bucket;
     }
 
+    public String getOrg() { return __client.getOrg();}
+
     public InfluxDBClient getClient() {
-        return __client;
+        InfluxDBClient client= __client.getClient(getBucket());
+        return client;
     }
 
     private final String __bucket;
-    private final InfluxDBClient __client;
+    private final DbClient __client;
 
     @Override
     public void close() throws Exception {

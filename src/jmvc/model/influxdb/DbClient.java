@@ -26,6 +26,11 @@ public class DbClient implements ApiToken {
         return InfluxDBClientFactory.create(url, getToken().toCharArray(), getOrg());
     }
 
+    public InfluxDBClient getClient(String bucket) {
+        final String url = String.format("http://%s:%d", host, port);
+        return InfluxDBClientFactory.create(url, getToken().toCharArray(), getOrg(), bucket);
+    }
+
     public QueryApi getQueryApi() {
         return getClient().getQueryApi();
     }
