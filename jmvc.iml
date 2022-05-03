@@ -11,7 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library" scope="TEST">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library name="JUnit4">
         <CLASSES>
           <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.13.1/junit-4.13.1.jar!/" />
@@ -21,7 +21,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library" scope="TEST">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library name="JUnit5.8.1">
         <CLASSES>
           <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter/5.8.1/junit-jupiter-5.8.1.jar!/" />
@@ -37,8 +37,8 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="influxdb.client.java" level="project" />
+    <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="module" module-name="gblibx" />
-    <orderEntry type="library" exported="" name="influxdb.client.java" level="project" />
-    <orderEntry type="library" exported="" name="json-20180130" level="project" />
   </component>
 </module>
