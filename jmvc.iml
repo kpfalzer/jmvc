@@ -38,7 +38,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="influxdb.client.java" level="project" />
-    <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="module" module-name="gblibx" />
   </component>
 </module>
