@@ -7,7 +7,11 @@ import com.influxdb.query.FluxTable;
 
 import java.util.List;
 
-public class DbClient implements ApiToken {
+import static gblibx.Util.invariant;
+import static gblibx.Util.isNonNull;
+import static java.util.Objects.isNull;
+
+public class DbClient implements ApiToken, AutoCloseable {
     public DbClient(String host, int port) {
         this.host=host;
         this.port=port;
@@ -22,13 +26,21 @@ public class DbClient implements ApiToken {
     }
 
     public InfluxDBClient getClient() {
-        final String url = String.format("http://%s:%d", host, port);
-        return InfluxDBClientFactory.create(url, getToken().toCharArray(), getOrg());
+        if (isNull(__client)) {
+            final String url = String.format("http://%s:%d", host, port);
+            __client = InfluxDBClientFactory.create(url, getToken().toCharArray(), getOrg());
+        }
+        invariant(isNonNull(__client));
+        return __client;
     }
 
     public InfluxDBClient getClient(String bucket) {
-        final String url = String.format("http://%s:%d", host, port);
-        return InfluxDBClientFactory.create(url, getToken().toCharArray(), getOrg(), bucket);
+        if (isNull(__client)) {
+            final String url = String.format("http://%s:%d", host, port);
+            __client= InfluxDBClientFactory.create(url, getToken().toCharArray(), getOrg(), bucket);
+        }
+        invariant(isNonNull(__client));
+        return __client;
     }
 
     public QueryApi getQueryApi() {
@@ -43,5 +55,15 @@ public class DbClient implements ApiToken {
      */
     public List<FluxTable> query(String flux) {
         return getQueryApi().query(flux);
+    }
+
+    private InfluxDBClient __client = null;
+
+    @Override
+    public void close() throws Exception {
+        if (isNonNull(__client)) {
+            __client.close();
+        }
+        __client = null;
     }
 }
