@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../gblibx/lib/javax.mail-1.6.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../gblibx/lib/json-20180130.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../gblibx/lib/Java-WebSocket-1.4.0-with-dependencies.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
