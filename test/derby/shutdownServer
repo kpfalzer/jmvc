@@ -1,4 +1,0 @@
-#!/bin/csh -f
-
-source ./common.csh
-exec java -Dderby.system.home=$PWD -jar ./derbyrun.jar server shutdown -h $host -p $port
