@@ -39,25 +39,21 @@ https://stackoverflow.com/questions/64419343/how-to-reference-public-github-pack
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <groupId>github.com.kpfalzer</groupId>
+    <groupId>com.github.kpfalzer</groupId>
     <artifactId>jmvc</artifactId>
     <version>2022.05.18</version>
     <repositories>
-        <repository>
-            <id>gblibx</id>
-            <!--<name>github/gblibx</name>-->
-            <url>https://github.com/kpfalzer/gblibx</url>
-        </repository>
     </repositories>
     <dependencies>
         <dependency>
-            <groupId>github.com.kpfalzer</groupId>
+            <!-- this needs to be built before -->
+            <groupId>com.github.kpfalzer</groupId>
             <artifactId>gblibx</artifactId>
             <version>2022.05.18</version>
         </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
+            <artifactId>derbyclient</artifactId>
             <version>10.14.2.0</version>
         </dependency>
         <dependency>
@@ -69,16 +65,19 @@ https://stackoverflow.com/questions/64419343/how-to-reference-public-github-pack
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.8.2</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>5.8.2</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.8.2</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.influxdb</groupId>
