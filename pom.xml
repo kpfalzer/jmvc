@@ -86,5 +86,11 @@ https://stackoverflow.com/questions/64419343/how-to-reference-public-github-pack
             <!-- TODO: try much later version -->
             <version>3.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.miachm.sods</groupId>
+            <artifactId>SODS</artifactId>
+            <version>1.4.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>
